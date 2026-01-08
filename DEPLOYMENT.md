@@ -1,5 +1,11 @@
 # Deployment Guide: Cloudflare Pages
 
+## Automatic Configuration (wrangler.json)
+
+A `wrangler.json` file has been added to the repository. This file allows `npx wrangler deploy` to work out-of-the-box by specifying the build output directory (`./dist`) as static assets.
+
+This resolves errors where the deployment command fails with "Missing entry-point".
+
 ## Recommended Configuration (Git Integration)
 
 When connecting this repository to Cloudflare Pages via the dashboard, use the following settings:
@@ -37,3 +43,6 @@ npm run build
 # Then, deploy the 'dist' folder
 npx wrangler pages deploy dist
 ```
+
+**Option 3: Wrangler Configuration (Applied)**
+We have added a `wrangler.json` file to the repository. This explicitly tells `wrangler` to treat the `dist` folder as the site assets. Now, running `npx wrangler deploy` (after building) should succeed.
