@@ -44,5 +44,29 @@ npm run build
 npx wrangler pages deploy dist
 ```
 
+## Why is my "Website Link" missing?
+
+If you see "Workers Builds" in your dashboard but no website link (URL), you likely created a **Worker** instead of a **Pages** project.
+
+### Solution
+
+**Option 1: Use the new Deploy Script (Recommended)**
+We have added a direct deployment script to `package.json`. Run this command in your terminal or CI/CD:
+
+```bash
+npm run deploy
+```
+
+This command (`npm run build && npx wrangler pages deploy dist`) forces Cloudflare to deploy your site as a **Pages** project, which will automatically generate a `*.pages.dev` URL.
+
+**Option 2: Cloudflare Dashboard**
+1.  Go to the Cloudflare Dashboard.
+2.  Navigate to **Workers & Pages**.
+3.  Click **Create Application** -> **Pages** (Not Workers!).
+4.  Connect your Git repository.
+5.  Use the settings below:
+    *   **Build Command:** `npm run build`
+    *   **Build Output:** `dist`
+
 **Option 3: Wrangler Configuration (Applied)**
 We have added a `wrangler.json` file to the repository. This explicitly tells `wrangler` to treat the `dist` folder as the site assets. Now, running `npx wrangler deploy` (after building) should succeed.
