@@ -1,5 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { experiencesData } from '../data/experiences';
+import { stayService } from '../services/stayService';
+import { routeService } from '../services/routeService';
+import StayCard from './StayCard';
 import { Filter, Star, Clock, Users, ArrowRight, Car, Coffee, Bed, Package, ChevronDown } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -179,7 +183,7 @@ const FilterStrip = ({ activeFilter, setActiveFilter }) => {
   );
 };
 
-const TicketCard = ({ item, category }) => {
+const TicketCard = ({ item, category, onNavigate }) => {
   // Visual patterns based on category
   const getVisualPattern = () => {
     switch (category) {
@@ -215,6 +219,15 @@ const TicketCard = ({ item, category }) => {
   const style = getVisualPattern();
   const Icon = category === 'stays' ? Bed : category === 'cabs' ? Car : category === 'tours' ? Coffee : Package;
 
+  const handleViewDetails = () => {
+      if (category === 'cabs') {
+          onNavigate('route-details', item.id);
+      } else {
+          // Fallback or generic navigation for other categories
+          console.log('Navigate to details for', category, item.id);
+      }
+  };
+
   return (
     <div className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col md:flex-row h-full">
       {/* Visual Area (Left/Top) */}
@@ -222,13 +235,21 @@ const TicketCard = ({ item, category }) => {
         className="h-40 md:h-auto md:w-1/3 relative flex items-center justify-center overflow-hidden"
         style={{ background: style.background }}
       >
-        <div className={clsx("w-12 h-12 rounded-full flex items-center justify-center shadow-lg z-10", style.iconBg)}>
-          <Icon className={clsx("w-6 h-6", style.iconColor)} />
-        </div>
+        {item.image ? (
+            <img src={item.image} alt={item.title} className="absolute inset-0 w-full h-full object-cover" />
+        ) : (
+            <div className={clsx("w-12 h-12 rounded-full flex items-center justify-center shadow-lg z-10", style.iconBg)}>
+            <Icon className={clsx("w-6 h-6", style.iconColor)} />
+            </div>
+        )}
         
         {/* Decorative Elements */}
-        <div className="absolute inset-0 bg-black/5" />
-        <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+        {!item.image && (
+            <>
+                <div className="absolute inset-0 bg-black/5" />
+                <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+            </>
+        )}
       </div>
 
       {/* Info Area (Right/Bottom) */}
@@ -271,7 +292,10 @@ const TicketCard = ({ item, category }) => {
           
           <div className="text-right">
             <div className="text-lg font-bold text-primary">{item.price}</div>
-            <button className="text-xs font-semibold text-accent flex items-center hover:underline mt-1 group/btn">
+            <button 
+                onClick={handleViewDetails}
+                className="text-xs font-semibold text-accent flex items-center hover:underline mt-1 group/btn"
+            >
               View Details <ArrowRight className="w-3 h-3 ml-1 transform group-hover/btn:translate-x-1 transition-transform" />
             </button>
           </div>
@@ -281,9 +305,14 @@ const TicketCard = ({ item, category }) => {
   );
 };
 
-const ExperiencesListing = ({ initialCategory = 'stays' }) => {
+const ExperiencesListing = ({ initialCategory = 'stays', onNavigate }) => {
   const [activeCategory, setActiveCategory] = useState(initialCategory);
   const [activeFilter, setActiveFilter] = useState('All');
+  const navigate = useNavigate();
+  const [realStays, setRealStays] = useState([]); // State for real stays from DB
+  const [realRoutes, setRealRoutes] = useState([]); // State for real routes from DB
+  const [loadingStays, setLoadingStays] = useState(false);
+  const [loadingRoutes, setLoadingRoutes] = useState(false);
 
   // Update activeCategory when initialCategory changes and scroll to top
   React.useEffect(() => {
@@ -291,21 +320,86 @@ const ExperiencesListing = ({ initialCategory = 'stays' }) => {
     window.scrollTo(0, 0);
   }, [initialCategory]);
 
+  // Fetch Stays from Service
+  useEffect(() => {
+    const fetchStays = async () => {
+        setLoadingStays(true);
+        try {
+            const { data } = await stayService.getStays();
+            setRealStays(data || []);
+        } catch (error) {
+            console.error("Failed to fetch stays", error);
+        } finally {
+            setLoadingStays(false);
+        }
+    };
+
+    if (activeCategory === 'stays') {
+        fetchStays();
+    }
+  }, [activeCategory]);
+
+  // Fetch Routes from Service
+  useEffect(() => {
+    const fetchRoutes = async () => {
+        setLoadingRoutes(true);
+        try {
+            const { data } = await routeService.getRoutes();
+            setRealRoutes(data || []);
+        } catch (error) {
+            console.error("Failed to fetch routes", error);
+        } finally {
+            setLoadingRoutes(false);
+        }
+    };
+
+    if (activeCategory === 'cabs') {
+        fetchRoutes();
+    }
+  }, [activeCategory]);
+
   const filteredData = useMemo(() => {
-    let data = experiencesData[activeCategory] || [];
+    let data = [];
+    
+    if (activeCategory === 'stays') {
+        data = realStays;
+    } else if (activeCategory === 'cabs') {
+        // Map Routes to TicketCard format
+        data = realRoutes.map(route => ({
+            id: route.id,
+            title: `${route.origin} to ${route.destination}`,
+            type: 'Expert Cab', // or route.type if available
+            price: `₹${route.basePrice}`,
+            duration: 'Flexible', // Route doesn't have duration in schema, maybe add or mock
+            capacity: route.capacity,
+            description: route.description || `Journey from ${route.origin} to ${route.destination}`,
+            tags: ['Route', 'Cab'], // Mock tags
+            image: route.coverImage,
+            // Add other fields required by TicketCard if any
+        }));
+    } else {
+        data = experiencesData[activeCategory] || [];
+    }
     
     // Simple mock sorting logic
     if (activeFilter === 'Price: Low to High') {
-       // Note: This is a string sort for now as prices are strings in mock data
-       // In a real app, parse the price first
-       return [...data].sort((a, b) => a.price.localeCompare(b.price));
+       return [...data].sort((a, b) => {
+           // Handle string price with symbols for mock data, number for real data
+           const priceA = typeof a.price === 'number' ? a.price : parseFloat(a.price?.replace(/[^0-9.]/g, '') || 0);
+           const priceB = typeof b.price === 'number' ? b.price : parseFloat(b.price?.replace(/[^0-9.]/g, '') || 0);
+           return priceA - priceB;
+       });
     }
     if (activeFilter === 'Price: High to Low') {
-       return [...data].sort((a, b) => b.price.localeCompare(a.price));
+       return [...data].sort((a, b) => {
+           const priceA = typeof a.price === 'number' ? a.price : parseFloat(a.price?.replace(/[^0-9.]/g, '') || 0);
+           const priceB = typeof b.price === 'number' ? b.price : parseFloat(b.price?.replace(/[^0-9.]/g, '') || 0);
+           return priceB - priceA;
+       });
     }
     
     return data;
-  }, [activeCategory, activeFilter]);
+  }, [activeCategory, activeFilter, realStays, realRoutes]);
 
   return (
     <div className="min-h-screen bg-snow pb-20">
@@ -320,9 +414,33 @@ const ExperiencesListing = ({ initialCategory = 'stays' }) => {
 
       <main className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-6 max-w-5xl mx-auto">
-          {filteredData.map((item) => (
-            <TicketCard key={item.id} item={item} category={activeCategory} />
-          ))}
+          {activeCategory === 'stays' && loadingStays ? (
+              <div className="col-span-full text-center py-12 text-gray-500">Loading stays...</div>
+          ) : activeCategory === 'cabs' && loadingRoutes ? (
+              <div className="col-span-full text-center py-12 text-gray-500">Loading routes...</div>
+          ) : (
+            filteredData.map((item) => (
+                activeCategory === 'stays' ? (
+                    <StayCard key={item.id} stay={item} onNavigate={() => navigate(`/stay/${item.id}`)} />
+                ) : (
+                    <TicketCard 
+                        key={item.id} 
+                        item={item} 
+                        category={activeCategory} 
+                        onNavigate={(page, id) => {
+                            if (page === 'route-details') navigate(`/route/${id}`);
+                            else if (page === 'experiences') navigate('/experiences'); // Fallback
+                        }} 
+                    />
+                )
+            ))
+          )}
+          
+          {(!loadingStays && !loadingRoutes) && filteredData.length === 0 && (
+              <div className="col-span-full text-center py-12 text-gray-500">
+                  No items found in this category.
+              </div>
+          )}
         </div>
       </main>
     </div>

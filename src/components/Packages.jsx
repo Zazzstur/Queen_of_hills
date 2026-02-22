@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const PackageCard = ({ title, gradient, description, price }) => (
   <div className="group relative h-80 rounded-2xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-500">
@@ -25,7 +26,8 @@ const PackageCard = ({ title, gradient, description, price }) => (
   </div>
 );
 
-const Packages = ({ onNavigate }) => {
+const Packages = () => {
+  const navigate = useNavigate();
   const packages = [
     {
       title: "Tea Plucking",
@@ -62,7 +64,7 @@ const Packages = ({ onNavigate }) => {
             <p className="text-gray-600">Designed for the discerning traveler seeking authenticity.</p>
           </div>
           <button 
-            onClick={() => onNavigate('experiences', 'packages')}
+            onClick={() => navigate('/experiences')}
             className="hidden md:block text-primary font-medium hover:text-accent transition-colors underline-offset-4 hover:underline mt-4 md:mt-0"
           >
             View all packages
@@ -76,7 +78,7 @@ const Packages = ({ onNavigate }) => {
         </div>
 
         <button 
-          onClick={() => onNavigate('experiences', 'packages')}
+          onClick={() => navigate('/experiences')}
           className="md:hidden w-full mt-8 py-3 border border-primary text-primary rounded-lg font-medium hover:bg-primary hover:text-white transition-colors"
         >
           View all packages

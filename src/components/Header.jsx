@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import clsx from 'clsx';
 
-const Header = ({ onNavigate, isTransparent = false }) => {
+const Header = ({ isTransparent = false }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -14,20 +16,17 @@ const Header = ({ onNavigate, isTransparent = false }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navLinks = [
-    { name: 'Home', href: '#', action: () => onNavigate('home') },
-    { name: 'Experiences', href: '#experiences', action: () => onNavigate('experiences') },
-    { name: 'About', href: '#about', action: () => onNavigate('home') },
-    { name: 'Contact', href: '#contact', action: () => onNavigate('home') },
-  ];
-
-  const handleNavClick = (e, link) => {
-    e.preventDefault();
-    if (link.action) {
-      link.action();
-    }
+  // Close mobile menu on route change
+  useEffect(() => {
     setIsMenuOpen(false);
-  };
+  }, [location]);
+
+  const navLinks = [
+    { name: 'Home', path: '/' },
+    { name: 'Experiences', path: '/experiences' },
+    { name: 'About', path: '/#about' }, // Assuming these sections might exist on Home or separate pages later
+    { name: 'Contact', path: '/#contact' },
+  ];
 
   return (
     <header
@@ -39,26 +38,26 @@ const Header = ({ onNavigate, isTransparent = false }) => {
       )}
     >
       <div className="container mx-auto flex items-center justify-between">
-        <a 
-          href="#" 
+        <Link 
+          to="/" 
           className={clsx(
             "font-serif text-2xl font-bold transition-colors duration-300",
             isTransparent && !isScrolled && !isMenuOpen ? "text-white" : "text-[#064E3B]"
           )}
         >
           Queen of the Hills
-        </a>
+        </Link>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
           {navLinks.map((link) => (
-            <a
+            <NavLink
               key={link.name}
-              href={link.href}
-              onClick={(e) => handleNavClick(e, link)}
-              className={clsx(
+              to={link.path}
+              className={({ isActive }) => clsx(
                 "font-medium transition-colors duration-300 relative group hover:text-[#D97706]",
-                isTransparent && !isScrolled ? "text-white" : "text-[#064E3B]"
+                isTransparent && !isScrolled ? "text-white" : "text-[#064E3B]",
+                isActive && !link.path.startsWith('/#') ? "text-[#D97706]" : ""
               )}
             >
               {link.name}
@@ -66,7 +65,7 @@ const Header = ({ onNavigate, isTransparent = false }) => {
                 "absolute -bottom-1 left-0 w-0 h-0.5 transition-all duration-300 group-hover:w-full",
                 isTransparent && !isScrolled ? "bg-white" : "bg-[#D97706]"
               )} />
-            </a>
+            </NavLink>
           ))}
         </nav>
 
@@ -92,14 +91,13 @@ const Header = ({ onNavigate, isTransparent = false }) => {
       >
         <nav className="flex flex-col space-y-4 px-6 pb-6">
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.name}
-              href={link.href}
+              to={link.path}
               className="text-[#064E3B] text-lg font-medium py-2 border-b border-gray-100 hover:text-[#D97706] transition-colors min-h-[48px] flex items-center"
-              onClick={(e) => handleNavClick(e, link)}
             >
               {link.name}
-            </a>
+            </Link>
           ))}
         </nav>
       </div>

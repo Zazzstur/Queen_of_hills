@@ -136,5 +136,8 @@ export const experiencesData = {
       description: 'Trekking, rafting, and extensive tea garden explorations.',
       tags: ['Adventure', 'Active']
     }
-  ]
+  ],
+  routes: [], // Added for routes management
+  rooms: [], // Added for relational integrity
+  room_images: [] // Added for relational integrity
 };

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Bed, Car, Coffee } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const ServiceCard = ({ icon: Icon, title, description, delay, onClick }) => (
   <div 
@@ -20,7 +21,13 @@ const ServiceCard = ({ icon: Icon, title, description, delay, onClick }) => (
   </div>
 );
 
-const Services = ({ onNavigate }) => {
+const Services = () => {
+  const navigate = useNavigate();
+
+  const handleNavigate = (category) => {
+    navigate('/experiences');
+  };
+
   const services = [
     {
       icon: Bed,
@@ -58,7 +65,7 @@ const Services = ({ onNavigate }) => {
             <ServiceCard 
               key={index} 
               {...service} 
-              onClick={() => onNavigate('experiences', service.category)}
+              onClick={() => handleNavigate(service.category)}
             />
           ))}
         </div>
