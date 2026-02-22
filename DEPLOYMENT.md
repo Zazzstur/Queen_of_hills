@@ -2,7 +2,7 @@
 
 ## Automatic Configuration (wrangler.json)
 
-A `wrangler.json` file has been added to the repository. This file allows `npx wrangler deploy` to work out-of-the-box by specifying the build output directory (`./dist`) as static assets.
+A `wrangler.json` file has been added to the repository. This file allows `npm run deploy` to work out-of-the-box by specifying the build output directory (`./dist`) as static assets.
 
 This resolves errors where the deployment command fails with "Missing entry-point".
 
@@ -23,7 +23,7 @@ When connecting this repository to Cloudflare Pages via the dashboard, use the f
 
 ## Troubleshooting Deployment Errors
 
-If you encounter an error like `[ERROR] Missing entry-point to Worker script`, it means the deployment tool (Wrangler) thinks you are trying to deploy a Cloudflare Worker instead of a static site.
+If you encounter an error like `[ERROR] Missing entry-point to Worker script` or `Workers-specific command in a Pages project`, it means the deployment tool (Wrangler) thinks you are trying to deploy a Cloudflare Worker instead of a static site.
 
 ### Cause
 This usually happens if you run `npx wrangler deploy` without arguments, or if the "Build Command" in Cloudflare is set to run `wrangler deploy` manually.
@@ -34,14 +34,14 @@ This usually happens if you run `npx wrangler deploy` without arguments, or if t
 Ensure your "Build Command" is strictly `npm run build`. Do **not** add `wrangler deploy` to this command. Cloudflare Pages automatically handles the upload of the `dist` folder after the build command finishes.
 
 **Option 2: CLI (Manual)**
-If you are deploying manually from your terminal, use the specific Pages command pointing to your output folder:
+If you are deploying manually from your terminal, use the specific Pages command:
 
 ```bash
 # First, build the project
 npm run build
 
-# Then, deploy the 'dist' folder
-npx wrangler pages deploy dist
+# Then, deploy using the configured script
+npm run deploy
 ```
 
 ## Why is my "Website Link" missing?
@@ -51,13 +51,13 @@ If you see "Workers Builds" in your dashboard but no website link (URL), you lik
 ### Solution
 
 **Option 1: Use the new Deploy Script (Recommended)**
-We have added a direct deployment script to `package.json`. Run this command in your terminal or CI/CD:
+We have updated the direct deployment script in `package.json`. Run this command in your terminal or CI/CD:
 
 ```bash
 npm run deploy
 ```
 
-This command (`npm run build && npx wrangler pages deploy dist`) forces Cloudflare to deploy your site as a **Pages** project, which will automatically generate a `*.pages.dev` URL.
+This command (`npm run build && npx wrangler pages deploy`) forces Cloudflare to deploy your site as a **Pages** project using the configuration in `wrangler.json`, which will automatically generate a `*.pages.dev` URL.
 
 **Option 2: Cloudflare Dashboard**
 1.  Go to the Cloudflare Dashboard.
@@ -69,4 +69,4 @@ This command (`npm run build && npx wrangler pages deploy dist`) forces Cloudfla
     *   **Build Output:** `dist`
 
 **Option 3: Wrangler Configuration (Applied)**
-We have added a `wrangler.json` file to the repository. This explicitly tells `wrangler` to treat the `dist` folder as the site assets. Now, running `npx wrangler deploy` (after building) should succeed.
+We have added a `wrangler.json` file to the repository. This explicitly tells `wrangler` to treat the `dist` folder as the site assets. Now, running `npm run deploy` (after building) should succeed.
