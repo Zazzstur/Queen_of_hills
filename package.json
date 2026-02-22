@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "pages:dev": "wrangler pages dev dist",
     "build": "vite build",
     "deploy": "npm run build && npx wrangler pages deploy dist --project-name queen-of-the-hills",
     "lint": "eslint .",
