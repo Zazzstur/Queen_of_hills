@@ -7,7 +7,7 @@
     "dev": "vite",
     "pages:dev": "wrangler pages dev dist",
     "build": "vite build",
-    "deploy": "npm run build && npx wrangler pages deploy dist",
+    "deploy": "npm run build && npx wrangler pages deploy",
     "lint": "eslint .",
     "preview": "vite preview"
   },
