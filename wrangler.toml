@@ -1,0 +1,7 @@
+name = "queen-of-the-hills"
+compatibility_date = "2024-09-23"
+pages_build_output_dir = "dist"
+
+[vars]
+# Environment variables for server-side Functions
+# Set secrets via 'wrangler pages secret put' or the Dashboard
