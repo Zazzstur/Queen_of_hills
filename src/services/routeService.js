@@ -5,31 +5,36 @@ import { supabase } from '../lib/supabase';
 // Default to true if not specified in env
 const USE_LOCAL_DB = import.meta.env.VITE_USE_LOCAL_DB !== 'false';
 
+// If running in production (Cloudflare Pages), assume Supabase unless explicitly overridden
+const isProduction = import.meta.env.PROD; 
+// If it's production and VITE_USE_LOCAL_DB is NOT explicitly set to 'true', force Supabase
+const effectiveUseLocalDb = isProduction ? (import.meta.env.VITE_USE_LOCAL_DB === 'true') : USE_LOCAL_DB;
+
 export const routeService = {
   // Route Actions
   async createRoute(routeData) {
-    if (USE_LOCAL_DB) {
+    if (effectiveUseLocalDb) {
       return mockDb.createRoute(routeData);
     }
     return supabase.from('routes').insert([routeData]).select().single();
   },
 
   async getRoutes() {
-    if (USE_LOCAL_DB) {
+    if (effectiveUseLocalDb) {
       return mockDb.getRoutes();
     }
     return supabase.from('routes').select('*').order('created_at', { ascending: false });
   },
 
   async updateRoute(id, updates) {
-    if (USE_LOCAL_DB) {
+    if (effectiveUseLocalDb) {
       return mockDb.updateRoute(id, updates);
     }
     return supabase.from('routes').update(updates).eq('id', id).select().single();
   },
 
   async deleteRoute(id) {
-    if (USE_LOCAL_DB) {
+    if (effectiveUseLocalDb) {
       return mockDb.deleteRoute(id);
     }
     return supabase.from('routes').delete().eq('id', id);
@@ -44,7 +49,7 @@ export const routeService = {
     // Normalize routeId to string
     const sanitizedData = { ...stopData, routeId: String(stopData.routeId) };
 
-    if (USE_LOCAL_DB) {
+    if (effectiveUseLocalDb) {
       return mockDb.createStop(sanitizedData);
     }
     // Map camelCase to snake_case for DB if needed, but assuming DB uses camelCase or we map it.
@@ -68,14 +73,14 @@ export const routeService = {
   },
 
   async getStopsByRouteId(routeId) {
-    if (USE_LOCAL_DB) {
+    if (effectiveUseLocalDb) {
       return mockDb.getStopsByRouteId(routeId);
     }
     return supabase.from('stops').select('*').eq('route_id', routeId);
   },
 
   async deleteStop(id) {
-    if (USE_LOCAL_DB) {
+    if (effectiveUseLocalDb) {
       return mockDb.deleteStop(id);
     }
     return supabase.from('stops').delete().eq('id', id);
@@ -84,7 +89,7 @@ export const routeService = {
   // Image Actions
   async uploadImage(file, path) {
     // Reusing the same logic as stayService
-    if (USE_LOCAL_DB) {
+    if (effectiveUseLocalDb) {
       const { data } = await mockDb.uploadImage(file, path);
       return data.publicUrl;
     }
@@ -98,7 +103,7 @@ export const routeService = {
 
   async addStopImages(imagesDataArray) {
     // imagesDataArray is array of { stopId, url }
-    if (USE_LOCAL_DB) {
+    if (effectiveUseLocalDb) {
         const results = [];
         for (const img of imagesDataArray) {
             const res = await mockDb.createStopImage(img);
@@ -115,7 +120,7 @@ export const routeService = {
   },
 
   async getStopImages(stopId) {
-    if (USE_LOCAL_DB) {
+    if (effectiveUseLocalDb) {
       return mockDb.getStopImages(stopId);
     }
     return supabase.from('stop_images').select('*').eq('stop_id', stopId);
