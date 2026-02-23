@@ -7,7 +7,7 @@ export async function onRequest(context) {
     const checks = {
       has_supabase_url: !!env.SUPABASE_URL,
       has_supabase_key: !!env.SUPABASE_ANON_KEY,
-      node_env: process.env.NODE_ENV || 'unknown',
+      node_env: 'production',
       cf_pages: !!env.CF_PAGES,
       cf_pages_url: env.CF_PAGES_URL || 'unknown',
       cf_pages_branch: env.CF_PAGES_BRANCH || 'unknown',
