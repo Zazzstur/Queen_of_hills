@@ -3,5 +3,5 @@ compatibility_date = "2024-09-23"
 pages_build_output_dir = "dist"
 
 [vars]
-# Environment variables for server-side Functions
-# Set secrets via 'wrangler pages secret put' or the Dashboard
+SUPABASE_URL = "https://fwewzwhakwcctpstxvum.supabase.co"
+SUPABASE_ANON_KEY = ".eyJpc3MiOiJzdXBhYmFzeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9ZSIsInJlZiI6ImZ3ZXd6d2hha3djY3Rwc3R4dnVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk5MzA3MzYsImV4cCI6MjA4NTUwNjczNn0.f0DcVPlpFUpsAWQZJQE9U6Z1eAbcYwQjmPtRr8K3NDk"
