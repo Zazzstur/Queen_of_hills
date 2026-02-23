@@ -1,5 +1,6 @@
 import { mockDb } from './mockDb';
 import { supabase } from '../lib/supabase';
+import { executeWithRetry } from '../lib/dbHelper';
 
 // Toggle this to switch between Local and Supabase
 // Default to true if not specified in env
@@ -16,28 +17,40 @@ export const routeService = {
     if (effectiveUseLocalDb) {
       return mockDb.createRoute(routeData);
     }
-    return supabase.from('routes').insert([routeData]).select().single();
+    return executeWithRetry(
+      () => supabase.from('routes').insert([routeData]).select().single(),
+      'Create Route'
+    );
   },
 
   async getRoutes() {
     if (effectiveUseLocalDb) {
       return mockDb.getRoutes();
     }
-    return supabase.from('routes').select('*').order('created_at', { ascending: false });
+    return executeWithRetry(
+      () => supabase.from('routes').select('*').order('created_at', { ascending: false }),
+      'Get Routes'
+    );
   },
 
   async updateRoute(id, updates) {
     if (effectiveUseLocalDb) {
       return mockDb.updateRoute(id, updates);
     }
-    return supabase.from('routes').update(updates).eq('id', id).select().single();
+    return executeWithRetry(
+      () => supabase.from('routes').update(updates).eq('id', id).select().single(),
+      `Update Route ${id}`
+    );
   },
 
   async deleteRoute(id) {
     if (effectiveUseLocalDb) {
       return mockDb.deleteRoute(id);
     }
-    return supabase.from('routes').delete().eq('id', id);
+    return executeWithRetry(
+      () => supabase.from('routes').delete().eq('id', id),
+      `Delete Route ${id}`
+    );
   },
 
   // Stop Actions
@@ -69,21 +82,30 @@ export const routeService = {
     const dbData = { ...sanitizedData, route_id: sanitizedData.routeId };
     delete dbData.routeId;
     
-    return supabase.from('stops').insert([dbData]).select().single();
+    return executeWithRetry(
+      () => supabase.from('stops').insert([dbData]).select().single(),
+      'Add Stop'
+    );
   },
 
   async getStopsByRouteId(routeId) {
     if (effectiveUseLocalDb) {
       return mockDb.getStopsByRouteId(routeId);
     }
-    return supabase.from('stops').select('*').eq('route_id', routeId);
+    return executeWithRetry(
+      () => supabase.from('stops').select('*').eq('route_id', routeId),
+      `Get Stops for Route ${routeId}`
+    );
   },
 
   async deleteStop(id) {
     if (effectiveUseLocalDb) {
       return mockDb.deleteStop(id);
     }
-    return supabase.from('stops').delete().eq('id', id);
+    return executeWithRetry(
+      () => supabase.from('stops').delete().eq('id', id),
+      `Delete Stop ${id}`
+    );
   },
 
   // Image Actions
@@ -94,7 +116,10 @@ export const routeService = {
       return data.publicUrl;
     }
     
-    const { data, error } = await supabase.storage.from('routes').upload(path, file);
+    const { data, error } = await executeWithRetry(
+      () => supabase.storage.from('routes').upload(path, file),
+      'Upload Image'
+    );
     if (error) throw error;
     
     const { data: { publicUrl } } = supabase.storage.from('routes').getPublicUrl(data.path);
@@ -116,13 +141,19 @@ export const routeService = {
         stop_id: img.stopId,
         url: img.url
     }));
-    return supabase.from('stop_images').insert(dbImages).select();
+    return executeWithRetry(
+      () => supabase.from('stop_images').insert(dbImages).select(),
+      'Add Stop Images'
+    );
   },
 
   async getStopImages(stopId) {
     if (effectiveUseLocalDb) {
       return mockDb.getStopImages(stopId);
     }
-    return supabase.from('stop_images').select('*').eq('stop_id', stopId);
+    return executeWithRetry(
+      () => supabase.from('stop_images').select('*').eq('stop_id', stopId),
+      `Get Images for Stop ${stopId}`
+    );
   }
 };

@@ -1,5 +1,6 @@
 import { mockDb } from './mockDb';
 import { supabase } from '../lib/supabase';
+import { executeWithRetry } from '../lib/dbHelper';
 
 // Toggle this to switch between Local and Supabase
 // Default to true if not specified in env
@@ -16,49 +17,70 @@ export const stayService = {
     if (effectiveUseLocalDb) {
       return mockDb.createStay(stayData);
     }
-    return supabase.from('stays').insert([stayData]).select().single();
+    return executeWithRetry(
+      () => supabase.from('stays').insert([stayData]).select().single(),
+      'Create Stay'
+    );
   },
 
   async getStays() {
     if (effectiveUseLocalDb) {
       return mockDb.getStays();
     }
-    return supabase.from('stays').select('*');
+    return executeWithRetry(
+      () => supabase.from('stays').select('*'),
+      'Get Stays'
+    );
   },
 
   async updateStay(id, updates) {
     if (effectiveUseLocalDb) {
       return mockDb.updateStay(id, updates);
     }
-    return supabase.from('stays').update(updates).eq('id', id).select().single();
+    return executeWithRetry(
+      () => supabase.from('stays').update(updates).eq('id', id).select().single(),
+      `Update Stay ${id}`
+    );
   },
 
   async createRoom(roomData) {
     if (effectiveUseLocalDb) {
       return mockDb.createRoom(roomData);
     }
-    return supabase.from('rooms').insert([roomData]).select().single();
+    return executeWithRetry(
+      () => supabase.from('rooms').insert([roomData]).select().single(),
+      'Create Room'
+    );
   },
 
   async updateRoom(id, updates) {
     if (effectiveUseLocalDb) {
       return mockDb.updateRoom(id, updates);
     }
-    return supabase.from('rooms').update(updates).eq('id', id).select().single();
+    return executeWithRetry(
+      () => supabase.from('rooms').update(updates).eq('id', id).select().single(),
+      `Update Room ${id}`
+    );
   },
 
   async deleteRoom(id) {
     if (effectiveUseLocalDb) {
       return mockDb.deleteRoom(id);
     }
-    return supabase.from('rooms').delete().eq('id', id);
+    return executeWithRetry(
+      () => supabase.from('rooms').delete().eq('id', id),
+      `Delete Room ${id}`
+    );
   },
 
   async getRoomsByStayId(stayId) {
     if (effectiveUseLocalDb) {
       return mockDb.getRoomsByStayId(stayId);
     }
-    return supabase.from('rooms').select('*').eq('stay_id', stayId);
+    return executeWithRetry(
+      () => supabase.from('rooms').select('*').eq('stay_id', stayId),
+      `Get Rooms for Stay ${stayId}`
+    );
   },
 
   async uploadImage(file, path) {
@@ -67,7 +89,10 @@ export const stayService = {
       return data.publicUrl;
     }
     
-    const { data, error } = await supabase.storage.from('stays').upload(path, file);
+    const { data, error } = await executeWithRetry(
+      () => supabase.storage.from('stays').upload(path, file),
+      'Upload Image'
+    );
     if (error) throw error;
     
     const { data: { publicUrl } } = supabase.storage.from('stays').getPublicUrl(data.path);
@@ -78,20 +103,29 @@ export const stayService = {
     if (effectiveUseLocalDb) {
       return mockDb.createRoomImage(imageData);
     }
-    return supabase.from('room_images').insert([imageData]);
+    return executeWithRetry(
+      () => supabase.from('room_images').insert([imageData]),
+      'Create Room Image'
+    );
   },
 
   async getRoomImages(roomId) {
     if (effectiveUseLocalDb) {
       return mockDb.getRoomImages(roomId);
     }
-    return supabase.from('room_images').select('*').eq('room_id', roomId);
+    return executeWithRetry(
+      () => supabase.from('room_images').select('*').eq('room_id', roomId),
+      `Get Images for Room ${roomId}`
+    );
   },
 
   async deleteRoomImage(id) {
     if (effectiveUseLocalDb) {
       return mockDb.deleteRoomImage(id);
     }
-    return supabase.from('room_images').delete().eq('id', id);
+    return executeWithRetry(
+      () => supabase.from('room_images').delete().eq('id', id),
+      `Delete Room Image ${id}`
+    );
   }
 };

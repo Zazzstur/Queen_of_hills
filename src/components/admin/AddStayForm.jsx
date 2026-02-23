@@ -64,7 +64,7 @@ const AddStayForm = ({ onComplete, onCancel, initialData }) => {
       setRooms(roomsWithCounts);
     } catch (err) {
       console.error('Error fetching rooms:', err);
-      showNotification('error', 'Failed to load rooms');
+      showNotification('error', err.message || 'Failed to load rooms');
     }
   };
 

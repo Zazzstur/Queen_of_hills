@@ -95,7 +95,8 @@ const AdminDashboard = () => {
       setRoutes(fetchedRoutes || []);
     } catch (err) {
       console.error("Failed to fetch routes:", err);
-      setRouteError("Failed to load routes from database.");
+      const errorMessage = err.message || "Failed to load routes from database.";
+      setRouteError(errorMessage);
     } finally {
       setLoadingRoutes(false);
     }
