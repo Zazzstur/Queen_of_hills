@@ -7,8 +7,9 @@
     "dev": "vite",
     "pages:dev": "wrangler pages dev dist",
     "build": "vite build",
-    "deploy": "npm run build && npx wrangler pages deploy",
+    "deploy": "npm run build && wrangler pages deploy",
     "lint": "eslint .",
+    "diagnose": "node scripts/diagnose.js",
     "preview": "vite preview"
   },
   "dependencies": {

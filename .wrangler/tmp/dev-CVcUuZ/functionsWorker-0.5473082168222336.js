@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 
-// .wrangler/tmp/bundle-U0b1Ih/checked-fetch.js
+// .wrangler/tmp/bundle-JLxA6A/checked-fetch.js
 var urls = /* @__PURE__ */ new Set();
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
@@ -56,17 +56,39 @@ globalThis.fetch = new Proxy(globalThis.fetch, {
   }
 });
 async function onRequest(context) {
-  return new Response(JSON.stringify({
-    status: "ok",
-    timestamp: (/* @__PURE__ */ new Date()).toISOString(),
-    message: "Server-side API is working",
-    env_check: {
-      has_supabase_url: !!context.env.SUPABASE_URL,
-      has_supabase_key: !!context.env.SUPABASE_ANON_KEY
-    }
-  }), {
-    headers: { "Content-Type": "application/json" }
-  });
+  try {
+    const { env, request } = context;
+    const url = new URL(request.url);
+    const checks = {
+      has_supabase_url: !!env.SUPABASE_URL,
+      has_supabase_key: !!env.SUPABASE_ANON_KEY,
+      node_env: "development",
+      cf_pages: !!env.CF_PAGES,
+      cf_pages_url: env.CF_PAGES_URL || "unknown",
+      cf_pages_branch: env.CF_PAGES_BRANCH || "unknown"
+    };
+    return new Response(JSON.stringify({
+      status: "ok",
+      timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+      message: "System Operational",
+      checks,
+      region: request.cf?.colo || "unknown"
+    }), {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*"
+      }
+    });
+  } catch (err) {
+    return new Response(JSON.stringify({
+      status: "error",
+      message: err.message,
+      timestamp: (/* @__PURE__ */ new Date()).toISOString()
+    }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
 }
 __name(onRequest, "onRequest");
 __name2(onRequest, "onRequest");
@@ -773,7 +795,7 @@ var jsonError2 = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx
 }, "jsonError");
 var middleware_miniflare3_json_error_default2 = jsonError2;
 
-// .wrangler/tmp/bundle-U0b1Ih/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-JLxA6A/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__2 = [
   middleware_ensure_req_body_drained_default2,
   middleware_miniflare3_json_error_default2
@@ -805,7 +827,7 @@ function __facade_invoke__2(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__2, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-U0b1Ih/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-JLxA6A/middleware-loader.entry.ts
 var __Facade_ScheduledController__2 = class ___Facade_ScheduledController__2 {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

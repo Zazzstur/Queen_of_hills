@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Check, MapPin, Trash2, AlertCircle, Loader2 } from 'lucide-react';
+import { Plus, Check, MapPin, AlertCircle, Loader2 } from 'lucide-react';
 import StopCard from './StopCard';
+import StopDisplayCard from '../StopDisplayCard';
 import { routeService } from '../../services/routeService';
 import { runPersistenceTests } from '../../services/dbTest';
 
@@ -22,11 +23,8 @@ const StopsManagement = ({ routeId, onComplete }) => {
             setStops(data || []);
             
             // Debugging: Get raw stats
-            if (process.env.NODE_ENV === 'development') {
+            if (import.meta.env.MODE === 'development') {
                 try {
-                    // This is a hack to get raw DB stats since routeService doesn't expose getAllStops
-                    // We assume mockDb is available globally or we can't easily get it.
-                    // Instead, let's just log what we have.
                     setDebugInfo({
                         routeId,
                         stopsFound: data?.length || 0,
@@ -139,40 +137,18 @@ const StopsManagement = ({ routeId, onComplete }) => {
                 Add your first stop
             </button>
           </div>
-import StopDisplayCard from '../StopDisplayCard';
-
-// ... (imports remain the same, removing unused imports later if needed)
-
-// ... inside StopsManagement component, replacing the list mapping:
-
         ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {stops.map((stop, index) => (
                     <div key={stop.id} className="relative group">
-                        <StopDisplayCard 
-                            stop={stop} 
-                            // Reusing onAdd for edit/delete or visual purposes? 
-                            // The requirements asked for an "Add Stop Button" on the card.
-                            // Since this is management, maybe the button creates a duplicate or is just decorative for now?
-                            // Or better, let's keep the delete functionality as an overlay or separate button outside the card
-                            // OR pass a custom handler if the card supports it.
-                            // The card has `onAdd`. Let's assume for now it does nothing in admin view or triggers edit.
-                            // But wait, the requirements said "Position a circular floating action button... with + icon".
-                            // This implies the card is for USERS to add stops to their itinerary.
-                            // However, I am editing the ADMIN interface.
-                            // I will use the card here to visualize it, but I need to ensure Delete is still possible.
-                            // I'll wrap the card or overlay the delete button.
-                        />
-                        <button 
-                            onClick={() => handleDeleteStop(stop.id)}
-                            className="absolute top-2 right-2 z-30 bg-white/90 text-red-600 p-2 rounded-full shadow-sm hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
-                            title="Delete Stop"
-                        >
-                            <Trash2 className="w-5 h-5" />
-                        </button>
                         <div className="absolute top-2 left-2 z-30 bg-black/50 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm">
                             #{index + 1}
                         </div>
+                        <StopDisplayCard 
+                            stop={stop} 
+                            isSelected={true}
+                            onAdd={() => handleDeleteStop(stop.id)}
+                        />
                     </div>
                 ))}
             </div>
