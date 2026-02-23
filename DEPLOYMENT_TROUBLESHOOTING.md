@@ -58,3 +58,12 @@ git add .
 git commit -m "Fix syntax errors and add diagnostic tools"
 git push
 ```
+
+## 5. Workaround: Hardcoded Credentials (Current Solution)
+Since you experienced issues adding Environment Variables in the Cloudflare Dashboard (due to the "static assets" restriction), we have implemented a workaround:
+
+-   **Modified `functions/_middleware.js`**: We injected the `SUPABASE_URL` and `SUPABASE_ANON_KEY` directly into the request context if they are missing.
+-   **Why**: This ensures that even if Cloudflare Pages doesn't pass the variables to the Functions runtime, the application will still work using the hardcoded fallbacks.
+-   **Security Note**: These keys are "Anonymous" and safe to be exposed in client-side code, so hardcoding them in the server-side functions is an acceptable workaround for this project.
+
+If you later manage to enable Environment Variables in the dashboard, the code will prioritize those over the hardcoded values.
