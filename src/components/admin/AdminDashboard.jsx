@@ -7,14 +7,12 @@ import ServiceModal from './ServiceModal';
 import AddStayForm from './AddStayForm';
 import AddRouteForm from './AddRouteForm';
 import DeleteConfirmation from './DeleteConfirmation';
-import { LayoutDashboard, Home, Car, Map, Coffee, LogOut, Route as RouteIcon } from 'lucide-react';
+import { LayoutDashboard, Home, LogOut, Route as RouteIcon, Car } from 'lucide-react';
 
 const TABS = [
   { id: 'stays', label: 'Homestays', icon: Home },
-  { id: 'cabs', label: 'Cabs', icon: Car },
-  { id: 'routes', label: 'Routes', icon: RouteIcon },
-  { id: 'packages', label: 'Packages', icon: Map },
-  { id: 'tours', label: 'Tea Tours', icon: Coffee },
+  { id: 'routes', label: 'Sight Seeing', icon: RouteIcon },
+  { id: 'direct', label: 'Direct Travel', icon: Car },
 ];
 
 const FIELD_CONFIG = {
@@ -28,35 +26,19 @@ const FIELD_CONFIG = {
     { key: 'tags', label: 'Tags (comma separated)', hiddenInTable: true },
   ],
   routes: [
+    { key: 'name', label: 'Route Name', required: true },
     { key: 'origin', label: 'Origin', required: true },
     { key: 'destination', label: 'Destination', required: true },
     { key: 'basePrice', label: 'Base Price', required: true },
     { key: 'capacity', label: 'Capacity' },
     // Route display config for table
   ],
-  cabs: [
-    { key: 'title', label: 'Vehicle Name', required: true },
-    { key: 'type', label: 'Service Type', type: 'select', options: ['Expert Cab', 'Shared', 'Rental'] },
-    { key: 'price', label: 'Price', required: true },
-    { key: 'duration', label: 'Duration' },
+  direct: [
+    { key: 'name', label: 'Route Name', required: true },
+    { key: 'origin', label: 'Origin', required: true },
+    { key: 'destination', label: 'Destination', required: true },
+    { key: 'basePrice', label: 'Base Price', required: true },
     { key: 'capacity', label: 'Capacity' },
-    { key: 'image', label: 'Image URL', type: 'text' },
-    { key: 'description', label: 'Description', type: 'textarea' },
-  ],
-  packages: [
-    { key: 'title', label: 'Package Name', required: true },
-    { key: 'duration', label: 'Duration' },
-    { key: 'price', label: 'Price', required: true },
-    { key: 'capacity', label: 'Ideal For' },
-    { key: 'image', label: 'Image URL', type: 'text' },
-    { key: 'description', label: 'Description', type: 'textarea' },
-  ],
-  tours: [
-    { key: 'title', label: 'Tour Name', required: true },
-    { key: 'duration', label: 'Duration' },
-    { key: 'price', label: 'Price', required: true },
-    { key: 'image', label: 'Image URL', type: 'text' },
-    { key: 'description', label: 'Description', type: 'textarea' },
   ]
 };
 
@@ -79,9 +61,9 @@ const AdminDashboard = () => {
   const [deleteId, setDeleteId] = useState(null);
   const [deleteItemName, setDeleteItemName] = useState('');
 
-  // Fetch routes when activeTab is 'routes'
+  // Fetch routes when activeTab is 'routes' or 'direct'
   useEffect(() => {
-    if (activeTab === 'routes') {
+    if (activeTab === 'routes' || activeTab === 'direct') {
       fetchRoutes();
     }
   }, [activeTab]);
@@ -110,7 +92,7 @@ const AdminDashboard = () => {
     if (activeTab === 'stays') {
         setEditingItem(null);
         setIsAddingStay(true);
-    } else if (activeTab === 'routes') {
+    } else if (activeTab === 'routes' || activeTab === 'direct') {
         setEditingItem(null);
         setIsAddingRoute(true);
     } else {
@@ -129,7 +111,7 @@ const AdminDashboard = () => {
     
     if (activeTab === 'stays') {
         setIsAddingStay(true);
-    } else if (activeTab === 'routes') {
+    } else if (activeTab === 'routes' || activeTab === 'direct') {
         setIsAddingRoute(true);
     } else {
         setIsModalOpen(true);
@@ -138,18 +120,18 @@ const AdminDashboard = () => {
 
   const handleDeleteClick = (id) => {
     // Determine the item source based on active tab
-    const list = activeTab === 'routes' ? routes : data[activeTab];
+    const list = (activeTab === 'routes' || activeTab === 'direct') ? routes : data[activeTab];
     const item = list.find(i => i.id === id);
     
     if (item) {
-        setDeleteItemName(item.title || item.origin + ' to ' + item.destination);
+        setDeleteItemName(item.name || item.title || item.origin + ' to ' + item.destination);
         setDeleteId(id);
     }
   };
 
   const handleConfirmDelete = async () => {
     if (deleteId) {
-        if (activeTab === 'routes') {
+        if (activeTab === 'routes' || activeTab === 'direct') {
             try {
                 const { error } = await routeService.deleteRoute(deleteId);
                 if (error) throw error;
@@ -184,7 +166,12 @@ const AdminDashboard = () => {
   const ActiveIcon = TABS.find(t => t.id === activeTab)?.icon || LayoutDashboard;
 
   // Determine data source for current tab
-  const currentData = activeTab === 'routes' ? routes : data[activeTab];
+  const currentData = (activeTab === 'routes' || activeTab === 'direct')
+    ? routes.filter(r => {
+        if (activeTab === 'direct') return r.type === 'direct';
+        return !r.type || r.type === 'sightseeing';
+    })
+    : data[activeTab];
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
@@ -257,6 +244,7 @@ const AdminDashboard = () => {
         ) : isAddingRoute ? (
           <AddRouteForm 
             initialData={editingItem}
+            defaultType={activeTab === 'direct' ? 'direct' : 'sightseeing'}
             onComplete={() => {
               setIsAddingRoute(false);
               setEditingItem(null);
@@ -269,13 +257,13 @@ const AdminDashboard = () => {
           />
         ) : (
           <>
-            {activeTab === 'routes' && routeError && (
+            {(activeTab === 'routes' || activeTab === 'direct') && routeError && (
                 <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-4">
                     {routeError}
                 </div>
             )}
             
-            {activeTab === 'routes' && loadingRoutes ? (
+            {(activeTab === 'routes' || activeTab === 'direct') && loadingRoutes ? (
                 <div className="text-center py-12 text-gray-500">Loading routes...</div>
             ) : (
                 <ServiceTable

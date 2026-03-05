@@ -23,8 +23,9 @@ const Header = ({ isTransparent = false }) => {
 
   const navLinks = [
     { name: 'Home', path: '/' },
-    { name: 'Experiences', path: '/experiences' },
-    { name: 'About', path: '/#about' }, // Assuming these sections might exist on Home or separate pages later
+    { name: 'Hotels & Stays', path: '/hotels-and-stays' },
+    { name: 'Sight Seeing', path: '/sight-seeing' },
+    { name: 'Direct Travel', path: '/direct-travel' },
     { name: 'Contact', path: '/#contact' },
   ];
 

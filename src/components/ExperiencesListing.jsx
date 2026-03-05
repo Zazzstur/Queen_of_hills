@@ -1,10 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { experiencesData } from '../data/experiences';
 import { stayService } from '../services/stayService';
 import { routeService } from '../services/routeService';
 import StayCard from './StayCard';
-import { Filter, Star, Clock, Users, ArrowRight, Car, Coffee, Bed, Package, ChevronDown } from 'lucide-react';
+import { Filter, Star, Clock, Users, ArrowRight, Bed, ChevronDown, Route, Car } from 'lucide-react';
 import clsx from 'clsx';
 
 // --- Components ---
@@ -40,9 +39,8 @@ const CategoryNav = ({ activeCategory, setActiveCategory, activeFilter, setActiv
   
   const categories = [
     { id: 'stays', label: 'Heritage Stays', icon: Bed },
-    { id: 'cabs', label: 'Expert Cabs', icon: Car },
-    { id: 'tours', label: 'Tea Tours', icon: Coffee },
-    { id: 'packages', label: 'Packages', icon: Package },
+    { id: 'routes', label: 'Sight Seeing', icon: Route },
+    { id: 'direct', label: 'Direct Travel', icon: Car },
   ];
 
   const filters = ['All', 'Price: Low to High', 'Price: High to Low', 'Top Rated'];
@@ -193,23 +191,17 @@ const TicketCard = ({ item, category, onNavigate }) => {
           iconBg: 'bg-primary',
           iconColor: 'text-white'
         };
-      case 'cabs':
+      case 'routes':
         return {
           background: '#064E3B',
           iconBg: 'bg-accent',
           iconColor: 'text-white'
         };
-      case 'tours':
+      case 'direct':
         return {
-          background: 'radial-gradient(circle at top right, #D97706, #064E3B)',
-          iconBg: 'bg-white/20 backdrop-blur-sm',
-          iconColor: 'text-white'
-        };
-      case 'packages':
-        return {
-          background: 'linear-gradient(135deg, #064E3B, #0D9488, #D97706)',
+          background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)', // Blue gradient for direct travel
           iconBg: 'bg-white',
-          iconColor: 'text-primary'
+          iconColor: 'text-blue-600'
         };
       default:
         return { background: '#F3F4F6' };
@@ -217,10 +209,10 @@ const TicketCard = ({ item, category, onNavigate }) => {
   };
 
   const style = getVisualPattern();
-  const Icon = category === 'stays' ? Bed : category === 'cabs' ? Car : category === 'tours' ? Coffee : Package;
+  const Icon = category === 'stays' ? Bed : (category === 'direct' ? Car : Route);
 
   const handleViewDetails = () => {
-      if (category === 'cabs') {
+      if (category === 'routes' || category === 'direct') {
           onNavigate('route-details', item.id);
       } else {
           // Fallback or generic navigation for other categories
@@ -353,7 +345,7 @@ const ExperiencesListing = ({ initialCategory = 'stays', onNavigate }) => {
         }
     };
 
-    if (activeCategory === 'cabs') {
+    if (activeCategory === 'routes' || activeCategory === 'direct') {
         fetchRoutes();
     }
   }, [activeCategory]);
@@ -363,22 +355,38 @@ const ExperiencesListing = ({ initialCategory = 'stays', onNavigate }) => {
     
     if (activeCategory === 'stays') {
         data = realStays;
-    } else if (activeCategory === 'cabs') {
+    } else if (activeCategory === 'routes') {
         // Map Routes to TicketCard format
-        data = realRoutes.map(route => ({
-            id: route.id,
-            title: `${route.origin} to ${route.destination}`,
-            type: 'Expert Cab', // or route.type if available
-            price: `₹${route.basePrice}`,
-            duration: 'Flexible', // Route doesn't have duration in schema, maybe add or mock
-            capacity: route.capacity,
-            description: route.description || `Journey from ${route.origin} to ${route.destination}`,
-            tags: ['Route', 'Cab'], // Mock tags
-            image: route.coverImage,
-            // Add other fields required by TicketCard if any
-        }));
+        data = realRoutes
+            .filter(r => !r.type || r.type === 'sightseeing')
+            .map(route => ({
+                id: route.id,
+                title: route.name || `${route.origin} to ${route.destination}`,
+                type: 'Sight Seeing', // or route.type if available
+                price: `₹${route.basePrice}`,
+                duration: 'Flexible', // Route doesn't have duration in schema, maybe add or mock
+                capacity: route.capacity,
+                description: route.description || `Journey from ${route.origin} to ${route.destination}`,
+                tags: ['Route', 'Travel'], // Mock tags
+                image: route.coverImage,
+                // Add other fields required by TicketCard if any
+            }));
+    } else if (activeCategory === 'direct') {
+        data = realRoutes
+            .filter(r => r.type === 'direct')
+            .map(route => ({
+                id: route.id,
+                title: route.name || `${route.origin} to ${route.destination}`,
+                type: 'Direct Travel',
+                price: `₹${route.basePrice}`,
+                duration: 'Point to Point',
+                capacity: route.capacity,
+                description: route.description || `Direct travel from ${route.origin} to ${route.destination}`,
+                tags: ['Direct', 'Transfer'],
+                image: route.coverImage,
+            }));
     } else {
-        data = experiencesData[activeCategory] || [];
+        data = [];
     }
     
     // Simple mock sorting logic
@@ -416,7 +424,7 @@ const ExperiencesListing = ({ initialCategory = 'stays', onNavigate }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-6 max-w-5xl mx-auto">
           {activeCategory === 'stays' && loadingStays ? (
               <div className="col-span-full text-center py-12 text-gray-500">Loading stays...</div>
-          ) : activeCategory === 'cabs' && loadingRoutes ? (
+          ) : (activeCategory === 'routes' || activeCategory === 'direct') && loadingRoutes ? (
               <div className="col-span-full text-center py-12 text-gray-500">Loading routes...</div>
           ) : (
             filteredData.map((item) => (

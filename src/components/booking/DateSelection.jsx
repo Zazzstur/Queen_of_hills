@@ -218,7 +218,9 @@ const DateSelection = () => {
         <div className="space-y-3 text-sm">
             <div className="flex justify-between pb-3 border-b border-gray-200">
                 <span className="text-gray-500">Service Type</span>
-                <span className="font-medium capitalize">{bookingData.serviceType}</span>
+                <span className="font-medium capitalize">
+                    {bookingData.serviceType === 'route' ? 'Sight Seeing' : bookingData.serviceType}
+                </span>
             </div>
             {startDate && (
                  <div className="flex justify-between pb-3 border-b border-gray-200">

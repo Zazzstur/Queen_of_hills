@@ -160,7 +160,9 @@ const CheckoutPage = () => {
                 <h4 className="font-bold text-gray-800 line-clamp-2">
                      {bookingData.serviceDetails.title || bookingData.serviceDetails.origin + ' to ' + bookingData.serviceDetails.destination}
                 </h4>
-                <p className="text-sm text-gray-500 capitalize">{bookingData.serviceType}</p>
+                <p className="text-sm text-gray-500 capitalize">
+                    {bookingData.serviceType === 'route' ? 'Sight Seeing' : bookingData.serviceType}
+                </p>
             </div>
         </div>
 

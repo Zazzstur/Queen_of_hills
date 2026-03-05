@@ -6,14 +6,16 @@ import { Upload, X, Loader2, ArrowRight, AlertCircle } from 'lucide-react';
 import { routeService } from '../../services/routeService';
 
 const routeSchema = z.object({
+  name: z.string().min(1, 'Route Name is required'),
   origin: z.string().min(1, 'Origin is required'),
   destination: z.string().min(1, 'Destination is required'),
   basePrice: z.coerce.number().min(1, 'Price must be greater than 0'),
   capacity: z.enum(['4 seater', '6 seater', '8 seater']),
+  type: z.enum(['sightseeing', 'direct']).default('sightseeing'),
   description: z.string().optional(),
 });
 
-const RouteDetailsForm = ({ onRouteCreated, initialData }) => {
+const RouteDetailsForm = ({ onRouteCreated, initialData, defaultType = 'sightseeing' }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [coverImage, setCoverImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(initialData?.coverImage || null);
@@ -23,10 +25,12 @@ const RouteDetailsForm = ({ onRouteCreated, initialData }) => {
   const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: zodResolver(routeSchema),
     defaultValues: {
+      name: initialData?.name || initialData?.routeName || '',
       origin: initialData?.origin || '',
       destination: initialData?.destination || '',
       basePrice: initialData?.basePrice || '',
       capacity: initialData?.capacity || '4 seater',
+      type: initialData?.type || defaultType,
       description: initialData?.description || '',
     }
   });
@@ -105,6 +109,16 @@ const RouteDetailsForm = ({ onRouteCreated, initialData }) => {
         <div className="space-y-6">
             <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">Route Information</h3>
             
+            <div className="space-y-1">
+                <label className="block text-sm font-medium text-gray-700">Route Name <span className="text-red-500">*</span></label>
+                <input 
+                    {...register('name')}
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all ${errors.name ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}
+                    placeholder="e.g. Heritage Darjeeling Tour"
+                />
+                {errors.name && <p className="text-red-500 text-xs">{errors.name.message}</p>}
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                     <label className="block text-sm font-medium text-gray-700">Origin <span className="text-red-500">*</span></label>
@@ -151,6 +165,18 @@ const RouteDetailsForm = ({ onRouteCreated, initialData }) => {
                     </select>
                     {errors.capacity && <p className="text-red-500 text-xs">{errors.capacity.message}</p>}
                 </div>
+            </div>
+
+            <div className="space-y-1">
+                <label className="block text-sm font-medium text-gray-700">Route Type <span className="text-red-500">*</span></label>
+                <select 
+                    {...register('type')}
+                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-white"
+                >
+                    <option value="sightseeing">Sight Seeing (with Stops)</option>
+                    <option value="direct">Direct Travel (Point to Point)</option>
+                </select>
+                {errors.type && <p className="text-red-500 text-xs">{errors.type.message}</p>}
             </div>
 
             <div className="space-y-1">

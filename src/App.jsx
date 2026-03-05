@@ -5,7 +5,6 @@ import Hero from './components/Hero';
 import Services from './components/Services';
 import ToyTrain from './components/ToyTrain';
 import PopularRoutes from './components/PopularRoutes';
-import Packages from './components/Packages';
 import Footer from './components/Footer';
 import ExperiencesListing from './components/ExperiencesListing';
 import AdminDashboard from './components/admin/AdminDashboard';
@@ -19,9 +18,8 @@ import RouteDetails from './components/RouteDetails';
 // Wrapper for main layout to handle header transparency logic based on route
 const Layout = ({ children }) => {
   const location = useLocation();
-  // Header is transparent only on Experiences page as per original logic, 
-  // or maybe Home if Hero is there? Original code: isTransparent = currentPage === 'experiences'
-  const isTransparent = location.pathname === '/experiences';
+  // Header is transparent on pages with CompactHero (dark background)
+  const isTransparent = ['/hotels-and-stays', '/sight-seeing', '/direct-travel', '/experiences'].includes(location.pathname);
 
   return (
     <>
@@ -52,7 +50,9 @@ function App() {
 
               {/* Public Routes with Header/Footer */}
               <Route path="/" element={<Layout><HomePage /></Layout>} />
-              <Route path="/experiences" element={<Layout><ExperiencesListing /></Layout>} />
+              <Route path="/hotels-and-stays" element={<Layout><ExperiencesListing /></Layout>} />
+              <Route path="/sight-seeing" element={<Layout><ExperiencesListing initialCategory="routes" /></Layout>} />
+              <Route path="/direct-travel" element={<Layout><ExperiencesListing initialCategory="direct" /></Layout>} />
               <Route path="/stay/:id" element={<Layout><StayDetails /></Layout>} />
               <Route path="/route/:id" element={<Layout><RouteDetails /></Layout>} />
               

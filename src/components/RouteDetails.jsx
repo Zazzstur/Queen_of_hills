@@ -86,16 +86,25 @@ const RouteDetails = () => {
       {/* Header / Breadcrumb */}
       <div className="container mx-auto px-4 mb-8">
         <button 
-            onClick={() => navigate('/experiences')}
+            onClick={() => {
+                if (route.type === 'direct') {
+                    navigate('/direct-travel');
+                } else {
+                    navigate('/experiences');
+                }
+            }}
             className="flex items-center text-gray-500 hover:text-primary transition-colors mb-4"
         >
-            <ArrowLeft className="w-4 h-4 mr-2" /> Back to Cabs
+            <ArrowLeft className="w-4 h-4 mr-2" /> 
+            {route.type === 'direct' ? 'Back to Direct Travel' : 'Back to Sight Seeing'}
         </button>
         <h1 className="text-3xl md:text-4xl font-serif text-primary font-bold">
             {route.origin} to {route.destination}
         </h1>
         <p className="text-gray-600 mt-2 flex items-center gap-2">
-            <span className="bg-secondary px-2 py-0.5 rounded text-xs font-medium text-gray-700">Expert Cab</span>
+            <span className="bg-secondary px-2 py-0.5 rounded text-xs font-medium text-gray-700">
+                {route.type === 'direct' ? 'Direct Travel' : 'Sight Seeing'}
+            </span>
             <span>•</span>
             <span>Capacity: {route.capacity}</span>
         </p>
@@ -141,12 +150,15 @@ const RouteDetails = () => {
         <div className="lg:col-span-2 space-y-6">
             <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
                 <MapPin className="w-6 h-6 text-accent" />
-                Stops & Sightseeing
+                {route.type === 'direct' ? 'Journey Details' : 'Stops & Sightseeing'}
             </h2>
             
             {stops.length === 0 ? (
                 <div className="bg-white rounded-2xl p-8 text-center border border-gray-100 text-gray-500">
-                    No specific stops listed for this route. It's a direct journey!
+                    {route.type === 'direct' 
+                        ? "This is a direct point-to-point journey without scheduled stops."
+                        : "No specific stops listed for this route. It's a direct journey!"
+                    }
                 </div>
             ) : (
                 <div className="relative border-l-2 border-dashed border-gray-300 ml-4 pl-8 space-y-12 py-4">

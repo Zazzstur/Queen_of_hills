@@ -486,6 +486,31 @@ export const mockDb = {
     }
   },
 
+  async updateStop(id, updates) {
+    await delay(300);
+    const db = getDb();
+    const index = (db.stops || []).findIndex(s => s.id === id);
+    
+    if (index === -1) return { data: null, error: new Error('Stop not found') };
+    
+    // Normalize routeId if present
+    const sanitizedUpdates = { ...updates };
+    if (sanitizedUpdates.routeId) {
+        sanitizedUpdates.routeId = String(sanitizedUpdates.routeId);
+    }
+    
+    const updatedStop = { 
+      ...db.stops[index], 
+      ...sanitizedUpdates,
+      updated_at: new Date().toISOString()
+    };
+    db.stops[index] = updatedStop;
+    saveDb(db);
+    
+    const hydrated = await rehydrateImages(updatedStop);
+    return { data: hydrated, error: null };
+  },
+
   async deleteStop(id) {
     await delay(300);
     const db = getDb();

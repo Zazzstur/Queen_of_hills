@@ -98,6 +98,23 @@ export const routeService = {
     );
   },
 
+  async updateStop(id, updates) {
+    if (effectiveUseLocalDb) {
+      return mockDb.updateStop(id, updates);
+    }
+    
+    const dbUpdates = { ...updates };
+    if (dbUpdates.routeId) {
+        dbUpdates.route_id = dbUpdates.routeId;
+        delete dbUpdates.routeId;
+    }
+
+    return executeWithRetry(
+      () => supabase.from('stops').update(dbUpdates).eq('id', id).select().single(),
+      `Update Stop ${id}`
+    );
+  },
+
   async deleteStop(id) {
     if (effectiveUseLocalDb) {
       return mockDb.deleteStop(id);

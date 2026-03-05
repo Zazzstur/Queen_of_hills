@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bed, Car, Coffee } from 'lucide-react';
+import { Bed, Route } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const ServiceCard = ({ icon: Icon, title, description, delay, onClick }) => (
@@ -37,18 +37,11 @@ const Services = () => {
       category: 'stays'
     },
     {
-      icon: Car,
-      title: "Expert Cabs",
-      description: "Premium transportation services with experienced local drivers for a safe and comfortable journey.",
+      icon: Route,
+      title: "Sight Seeing",
+      description: "Explore the best routes and scenic spots in Darjeeling with our curated travel experiences.",
       delay: 100,
-      category: 'cabs'
-    },
-    {
-      icon: Coffee,
-      title: "Tea Tours",
-      description: "Guided visits to world-renowned tea estates. Witness the journey from leaf to cup.",
-      delay: 200,
-      category: 'tours'
+      category: 'routes'
     }
   ];
 
@@ -60,7 +53,7 @@ const Services = () => {
           <div className="w-24 h-1 bg-accent mx-auto rounded-full" />
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {services.map((service, index) => (
             <ServiceCard 
               key={index} 

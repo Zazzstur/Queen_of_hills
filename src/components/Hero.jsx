@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Hero = () => {
   return (
@@ -46,20 +46,14 @@ const Hero = () => {
           Discover the Queen of the Hills through curated heritage experiences and breathtaking landscapes.
         </p>
 
-        {/* Glassmorphism Search */}
-        <div className="relative max-w-xl mx-auto animate-fade-in-up delay-200 group">
-          <div className="absolute inset-0 bg-white/40 backdrop-blur-md rounded-full shadow-lg border border-white/50" />
-          <div className="relative flex items-center px-6 py-4">
-            <Search className="text-primary w-6 h-6 mr-4" />
-            <input 
-              type="text" 
-              placeholder="Search experiences..." 
-              className="w-full bg-transparent border-none outline-none text-primary placeholder-primary/60 text-lg font-medium h-full"
-            />
-            <button className="hidden md:block bg-primary text-white px-6 py-2 rounded-full font-medium hover:bg-opacity-90 transition-all ml-2">
-              Explore
-            </button>
-          </div>
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row justify-center gap-4 animate-fade-in-up delay-200">
+          <Link to="/sight-seeing" className="bg-primary text-white px-8 py-3 rounded-full text-lg font-medium hover:bg-opacity-90 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 inline-block">
+            Sight Seeing
+          </Link>
+          <Link to="/direct-travel" className="bg-white/80 backdrop-blur-md text-primary border border-primary/20 px-8 py-3 rounded-full text-lg font-medium hover:bg-white transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 inline-block">
+            Direct Travel
+          </Link>
         </div>
       </div>
     </section>

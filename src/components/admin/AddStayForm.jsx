@@ -14,9 +14,9 @@ const AddStayForm = ({ onComplete, onCancel, initialData }) => {
   
   // Stay Form State
   const [stayData, setStayData] = useState({
-    title: '', // Changed from name to title to match schema
+    name: '', // Changed to name to match schema
     type: 'Homestay',
-    location: '', // Note: 'location' isn't in FIELD_CONFIG or initial data, but we can keep it if needed or map it
+    location: '',
     description: '',
     amenities: [],
     thumbnail_url: ''
@@ -39,7 +39,7 @@ const AddStayForm = ({ onComplete, onCancel, initialData }) => {
   useEffect(() => {
     if (initialData) {
       setStayData({
-        title: initialData.title || '',
+        name: initialData.name || initialData.title || '',
         type: initialData.type || 'Homestay',
         location: initialData.location || '',
         description: initialData.description || '',
@@ -306,7 +306,7 @@ const AddStayForm = ({ onComplete, onCancel, initialData }) => {
                 {initialData ? 'Edit Stay' : 'Add New Stay'}
                 </h2>
                 <p className="text-sm text-gray-500">
-                    {step === 1 ? 'Step 1: Basic Details' : `Step 2: Manage Rooms for "${stayData.title}"`}
+                    {step === 1 ? 'Step 1: Basic Details' : `Step 2: Manage Rooms for "${stayData.name}"`}
                 </p>
             </div>
             {/* Step Navigation */}
@@ -341,8 +341,8 @@ const AddStayForm = ({ onComplete, onCancel, initialData }) => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
                   <input
                     required
-                    name="title"
-                    value={stayData.title}
+                    name="name"
+                    value={stayData.name}
                     onChange={handleStayChange}
                     className="w-full px-3 py-2 border rounded-md focus:ring-primary focus:border-primary"
                     placeholder="e.g. Glenary's View Suite"

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { routeService } from '../services/routeService';
-import { ArrowRight, Users, Car } from 'lucide-react';
+import { ArrowRight, Users, Route } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const PopularRoutes = () => {
@@ -27,7 +27,7 @@ const PopularRoutes = () => {
     <section className="py-12 bg-white relative z-20 border-b border-gray-100">
       <div className="container mx-auto px-4">
         <h2 className="text-3xl md:text-4xl font-serif text-primary mb-8 text-center">
-          Popular Routes
+          Popular Sight Seeing
         </h2>
         <div className="flex gap-6 overflow-x-auto pb-8 snap-x snap-mandatory no-scrollbar px-4" style={{ scrollBehavior: 'smooth' }}>
           {routes.map((route) => (
@@ -46,7 +46,7 @@ const PopularRoutes = () => {
                     />
                  ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-300">
-                        <Car className="w-12 h-12" />
+                        <Route className="w-12 h-12" />
                     </div>
                  )}
                  <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-primary shadow-sm">
@@ -57,11 +57,15 @@ const PopularRoutes = () => {
               {/* Content Area */}
               <div className="p-6">
                 <div className="flex justify-between items-start mb-2">
-                    <span className="text-xs font-bold text-accent uppercase tracking-wider">Expert Cab</span>
+                    <span className="text-xs font-bold text-accent uppercase tracking-wider">Sight Seeing</span>
                 </div>
                 
                 <h3 className="font-serif text-xl font-bold text-gray-800 mb-2 group-hover:text-primary transition-colors">
-                    {route.origin} <span className="text-gray-400 mx-1">to</span> {route.destination}
+                    {route.name || (
+                        <>
+                            {route.origin} <span className="text-gray-400 mx-1">to</span> {route.destination}
+                        </>
+                    )}
                 </h3>
                 
                 <p className="text-sm text-gray-500 line-clamp-2 mb-4">

@@ -3,7 +3,7 @@ import { X, Map, MapPin, Plus, Save, Trash2, Pencil, Check, AlertCircle, Upload,
 import RouteDetailsForm from './RouteDetailsForm';
 import { routeService } from '../../services/routeService';
 
-const AddRouteForm = ({ onCancel, onComplete, initialData }) => {
+const AddRouteForm = ({ onCancel, onComplete, initialData, defaultType = 'sightseeing' }) => {
   const [step, setStep] = useState(1); // 1: Route Details, 2: Stops
   const [createdRoute, setCreatedRoute] = useState(initialData || null);
   const [loading, setLoading] = useState(false);
@@ -145,26 +145,9 @@ const AddRouteForm = ({ onCancel, onComplete, initialData }) => {
           let stopId = editingStopId;
 
           if (editingStopId) {
-              // Update Logic - routeService needs updateStop? 
-              // mockDb has updateStop? No, I didn't see updateStop in mockDb snippet!
-              // I saw createStop, getStopsByRouteId, deleteStop.
-              // If update is missing, we might have to delete and recreate or add updateStop.
-              // For now, let's assume we can only Add or Delete if Update is missing.
-              // Wait, AddStayForm has updateRoom.
-              // I should check mockDb again.
-              // mockDb has updateStay, updateRoom, updateRoute.
-              // It DOES NOT have updateStop in the snippet I read.
-              // So Editing might be tricky. I'll implement "Delete then Create" for edit as a hack if needed,
-              // or just handle Add for now.
-              // Actually, better to just Add.
-              // If I want to support Edit, I need to add updateStop to mockDb/routeService.
-              // I'll stick to ADD for now to match the user's "save the stops" request.
-              // But I'll leave the Edit UI there, maybe it just creates a new one if I can't update.
-              // Let's just focus on Create.
-              
-              // Actually, I can just create a new one and delete the old one if editing.
-              // Or better, I'll just implement Create first.
-              throw new Error("Update not supported yet");
+              const { data, error } = await routeService.updateStop(editingStopId, payload);
+              if (error) throw error;
+              stopId = editingStopId;
           } else {
               const { data, error } = await routeService.addStop(payload);
               if (error) throw error;
@@ -255,7 +238,7 @@ const AddRouteForm = ({ onCancel, onComplete, initialData }) => {
         {/* Content Area */}
         <div className="p-8 overflow-y-auto flex-1 bg-gray-50/50">
           {step === 1 ? (
-            <RouteDetailsForm onRouteCreated={handleRouteCreated} initialData={initialData} />
+            <RouteDetailsForm onRouteCreated={handleRouteCreated} initialData={initialData} defaultType={defaultType} />
           ) : (
             <div className="space-y-6">
                 {/* Add/Edit Stop Form */}
