@@ -9,8 +9,10 @@ const routeSchema = z.object({
   name: z.string().min(1, 'Route Name is required'),
   origin: z.string().min(1, 'Origin is required'),
   destination: z.string().min(1, 'Destination is required'),
-  basePrice: z.coerce.number().min(1, 'Price must be greater than 0'),
-  capacity: z.enum(['4 seater', '6 seater', '8 seater']),
+  price4Seater: z.coerce.number().min(1, 'Price must be greater than 0'),
+  price6SeaterLuxurySuv: z.coerce.number().min(1, 'Price must be greater than 0'),
+  price6to10SeaterSuv: z.coerce.number().min(1, 'Price must be greater than 0'),
+  capacity: z.enum(['4 seater', '6 seater luxury suv', '6-10 seater suv']),
   type: z.enum(['sightseeing', 'direct']).default('sightseeing'),
   description: z.string().optional(),
 });
@@ -28,7 +30,9 @@ const RouteDetailsForm = ({ onRouteCreated, initialData, defaultType = 'sightsee
       name: initialData?.name || initialData?.routeName || '',
       origin: initialData?.origin || '',
       destination: initialData?.destination || '',
-      basePrice: initialData?.basePrice || '',
+      price4Seater: initialData?.price4Seater ?? initialData?.basePrice ?? '',
+      price6SeaterLuxurySuv: initialData?.price6SeaterLuxurySuv ?? '',
+      price6to10SeaterSuv: initialData?.price6to10SeaterSuv ?? '',
       capacity: initialData?.capacity || '4 seater',
       type: initialData?.type || defaultType,
       description: initialData?.description || '',
@@ -141,29 +145,55 @@ const RouteDetailsForm = ({ onRouteCreated, initialData, defaultType = 'sightsee
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                    <label className="block text-sm font-medium text-gray-700">Base Price (₹) <span className="text-red-500">*</span></label>
-                    <input 
-                        type="number"
-                        {...register('basePrice')}
-                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all ${errors.basePrice ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}
-                        placeholder="0.00"
-                    />
-                    {errors.basePrice && <p className="text-red-500 text-xs">{errors.basePrice.message}</p>}
+            <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                        <label className="block text-sm font-medium text-gray-700">4 Seater Price (₹) <span className="text-red-500">*</span></label>
+                        <input 
+                            type="number"
+                            {...register('price4Seater')}
+                            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all ${errors.price4Seater ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}
+                            placeholder="0.00"
+                        />
+                        {errors.price4Seater && <p className="text-red-500 text-xs">{errors.price4Seater.message}</p>}
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="block text-sm font-medium text-gray-700">6 Seater Luxury SUV Price (₹) <span className="text-red-500">*</span></label>
+                        <input 
+                            type="number"
+                            {...register('price6SeaterLuxurySuv')}
+                            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all ${errors.price6SeaterLuxurySuv ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}
+                            placeholder="0.00"
+                        />
+                        {errors.price6SeaterLuxurySuv && <p className="text-red-500 text-xs">{errors.price6SeaterLuxurySuv.message}</p>}
+                    </div>
                 </div>
 
-                <div className="space-y-1">
-                    <label className="block text-sm font-medium text-gray-700">Vehicle Type <span className="text-red-500">*</span></label>
-                    <select 
-                        {...register('capacity')}
-                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-white"
-                    >
-                        <option value="4 seater">4 Seater Hatchback</option>
-                        <option value="6 seater">6 Seater SUV</option>
-                        <option value="8 seater">8 Seater MUV</option>
-                    </select>
-                    {errors.capacity && <p className="text-red-500 text-xs">{errors.capacity.message}</p>}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                        <label className="block text-sm font-medium text-gray-700">6-10 Seater SUV Price (₹) <span className="text-red-500">*</span></label>
+                        <input 
+                            type="number"
+                            {...register('price6to10SeaterSuv')}
+                            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all ${errors.price6to10SeaterSuv ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}
+                            placeholder="0.00"
+                        />
+                        {errors.price6to10SeaterSuv && <p className="text-red-500 text-xs">{errors.price6to10SeaterSuv.message}</p>}
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="block text-sm font-medium text-gray-700">Default Vehicle Type <span className="text-red-500">*</span></label>
+                        <select 
+                            {...register('capacity')}
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-white"
+                        >
+                            <option value="4 seater">4 Seater</option>
+                            <option value="6 seater luxury suv">6 Seater Luxury SUV</option>
+                            <option value="6-10 seater suv">6-10 Seater SUV</option>
+                        </select>
+                        {errors.capacity && <p className="text-red-500 text-xs">{errors.capacity.message}</p>}
+                    </div>
                 </div>
             </div>
 

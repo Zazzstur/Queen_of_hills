@@ -5,3 +5,5 @@ dist
 # .env.production
 .wrangler
 .trae
+
+.env.local

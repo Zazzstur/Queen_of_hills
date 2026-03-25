@@ -1,27 +1,80 @@
 import React, { useState } from 'react';
 import { useBooking } from '../../context/BookingContext';
 import { format } from 'date-fns';
-import { CreditCard, Wallet, Landmark, ArrowLeft, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, ShieldCheck } from 'lucide-react';
+import { bookingService } from '../../services/bookingService';
 
 const CheckoutPage = () => {
   const { bookingData, setCurrentStep, updateContact } = useBooking();
-  const [paymentMethod, setPaymentMethod] = useState('card');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [formError, setFormError] = useState('');
 
   const handlePayment = async () => {
+    setFormError('');
+    const name = bookingData.contactDetails.name?.trim();
+    const phone = bookingData.contactDetails.phone?.trim();
+    const pickupLocation = bookingData.contactDetails.pickupLocation?.trim();
+    if (!name || !phone || !pickupLocation) {
+      setFormError('Please fill all required fields.');
+      return;
+    }
+
     setIsProcessing(true);
-    // Simulate API call
-    setTimeout(() => {
-        setIsProcessing(false);
-        setCurrentStep(3); // Success Step
-    }, 2000);
+    try {
+      const stopNames = Array.isArray(bookingData.serviceDetails?.selectedStops)
+        ? bookingData.serviceDetails.selectedStops.map((s) => s?.name).filter(Boolean)
+        : undefined;
+
+      const payload = {
+        contact: {
+          name,
+          email: bookingData.contactDetails.email?.trim() || undefined,
+          phone,
+          pickupLocation,
+        },
+        service: {
+          type: bookingData.serviceType || '',
+          id: bookingData.serviceId || '',
+          title:
+            bookingData.serviceDetails?.title ||
+            bookingData.serviceDetails?.name ||
+            undefined,
+          origin: bookingData.serviceDetails?.origin || undefined,
+          destination: bookingData.serviceDetails?.destination || undefined,
+        },
+        booking: {
+          startDate: bookingData.startDate
+            ? new Date(bookingData.startDate).toISOString()
+            : undefined,
+          endDate: bookingData.endDate
+            ? new Date(bookingData.endDate).toISOString()
+            : undefined,
+          timeSlot: bookingData.timeSlot || undefined,
+          guests: Number(bookingData.guests || 1),
+          stopNames: stopNames?.length ? stopNames : undefined,
+        },
+        pricing: {
+          subtotal,
+          taxes,
+          total,
+        },
+      };
+
+      const { error } = await bookingService.createBooking(payload);
+      if (error) throw error;
+      setCurrentStep(3);
+    } catch (err) {
+      setFormError(err?.message || 'Failed to place booking.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
-  const calculateTaxes = (subtotal) => subtotal * 0.18; // 18% GST mock
+  const calculateTaxes = () => 0;
 
   const subtotal = bookingData.totalPrice;
   const taxes = calculateTaxes(subtotal);
-  const total = subtotal + taxes;
+  const total = subtotal;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 min-h-[500px]">
@@ -35,19 +88,25 @@ const CheckoutPage = () => {
         </button>
 
         <h2 className="text-2xl font-serif font-bold text-gray-800 mb-6">Confirm & Pay</h2>
+        {formError && (
+          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            {formError}
+          </div>
+        )}
 
         {/* Contact Info Form */}
         <div className="mb-8">
             <h3 className="font-bold text-gray-700 mb-4">Contact Details</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1">Full Name</label>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Full Name <span className="text-red-500">*</span></label>
                     <input 
                         type="text" 
                         className="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-primary"
                         placeholder="John Doe"
                         value={bookingData.contactDetails.name}
                         onChange={(e) => updateContact('name', e.target.value)}
+                        required
                     />
                 </div>
                 <div>
@@ -61,71 +120,26 @@ const CheckoutPage = () => {
                     />
                 </div>
                 <div className="md:col-span-2">
-                    <label className="block text-xs font-medium text-gray-500 mb-1">Phone Number</label>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Phone Number <span className="text-red-500">*</span></label>
                     <input 
                         type="tel" 
                         className="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-primary"
                         placeholder="+91 98765 43210"
                         value={bookingData.contactDetails.phone}
                         onChange={(e) => updateContact('phone', e.target.value)}
+                        required
                     />
                 </div>
-            </div>
-        </div>
-
-        {/* Payment Methods */}
-        <div className="mb-8">
-            <h3 className="font-bold text-gray-700 mb-4">Payment Method</h3>
-            <div className="space-y-3">
-                <div 
-                    onClick={() => setPaymentMethod('card')}
-                    className={`p-4 rounded-xl border flex items-center cursor-pointer transition-all ${
-                        paymentMethod === 'card' 
-                        ? 'border-primary bg-primary/5' 
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                >
-                    <div className={`w-5 h-5 rounded-full border mr-4 flex items-center justify-center ${
-                        paymentMethod === 'card' ? 'border-primary' : 'border-gray-300'
-                    }`}>
-                        {paymentMethod === 'card' && <div className="w-2.5 h-2.5 bg-primary rounded-full" />}
-                    </div>
-                    <CreditCard className="w-5 h-5 text-gray-600 mr-3" />
-                    <span className="font-medium text-gray-700">Credit / Debit Card</span>
-                </div>
-
-                <div 
-                    onClick={() => setPaymentMethod('upi')}
-                    className={`p-4 rounded-xl border flex items-center cursor-pointer transition-all ${
-                        paymentMethod === 'upi' 
-                        ? 'border-primary bg-primary/5' 
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                >
-                    <div className={`w-5 h-5 rounded-full border mr-4 flex items-center justify-center ${
-                        paymentMethod === 'upi' ? 'border-primary' : 'border-gray-300'
-                    }`}>
-                        {paymentMethod === 'upi' && <div className="w-2.5 h-2.5 bg-primary rounded-full" />}
-                    </div>
-                    <Wallet className="w-5 h-5 text-gray-600 mr-3" />
-                    <span className="font-medium text-gray-700">UPI / Digital Wallet</span>
-                </div>
-
-                <div 
-                    onClick={() => setPaymentMethod('bank')}
-                    className={`p-4 rounded-xl border flex items-center cursor-pointer transition-all ${
-                        paymentMethod === 'bank' 
-                        ? 'border-primary bg-primary/5' 
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                >
-                    <div className={`w-5 h-5 rounded-full border mr-4 flex items-center justify-center ${
-                        paymentMethod === 'bank' ? 'border-primary' : 'border-gray-300'
-                    }`}>
-                        {paymentMethod === 'bank' && <div className="w-2.5 h-2.5 bg-primary rounded-full" />}
-                    </div>
-                    <Landmark className="w-5 h-5 text-gray-600 mr-3" />
-                    <span className="font-medium text-gray-700">Net Banking</span>
+                <div className="md:col-span-2">
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Pickup Location <span className="text-red-500">*</span></label>
+                    <input
+                        type="text"
+                        className="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-primary"
+                        placeholder="Enter pickup location"
+                        value={bookingData.contactDetails.pickupLocation}
+                        onChange={(e) => updateContact('pickupLocation', e.target.value)}
+                        required
+                    />
                 </div>
             </div>
         </div>
@@ -135,7 +149,7 @@ const CheckoutPage = () => {
             disabled={isProcessing}
             className="w-full bg-primary text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all flex items-center justify-center"
         >
-            {isProcessing ? 'Processing...' : `Pay ₹${total.toFixed(0)}`}
+            {isProcessing ? 'Processing...' : 'Book'}
         </button>
         <p className="text-center text-xs text-gray-400 mt-4 flex items-center justify-center">
             <ShieldCheck className="w-3 h-3 mr-1" />
@@ -191,10 +205,6 @@ const CheckoutPage = () => {
             <div className="flex justify-between text-gray-600">
                 <span>Base Fare</span>
                 <span>₹{subtotal.toFixed(0)}</span>
-            </div>
-            <div className="flex justify-between text-gray-600">
-                <span>Taxes & Fees (18%)</span>
-                <span>₹{taxes.toFixed(0)}</span>
             </div>
             <div className="flex justify-between text-xl font-bold text-primary pt-3 border-t border-gray-200/50">
                 <span>Total</span>

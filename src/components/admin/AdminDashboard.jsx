@@ -7,12 +7,14 @@ import ServiceModal from './ServiceModal';
 import AddStayForm from './AddStayForm';
 import AddRouteForm from './AddRouteForm';
 import DeleteConfirmation from './DeleteConfirmation';
-import { LayoutDashboard, Home, LogOut, Route as RouteIcon, Car } from 'lucide-react';
+import BookingsManagement from './BookingsManagement';
+import { LayoutDashboard, Home, LogOut, Route as RouteIcon, Car, ClipboardList } from 'lucide-react';
 
 const TABS = [
   { id: 'stays', label: 'Homestays', icon: Home },
   { id: 'routes', label: 'Sight Seeing', icon: RouteIcon },
   { id: 'direct', label: 'Direct Travel', icon: Car },
+  { id: 'bookings', label: 'Bookings', icon: ClipboardList },
 ];
 
 const FIELD_CONFIG = {
@@ -29,16 +31,34 @@ const FIELD_CONFIG = {
     { key: 'name', label: 'Route Name', required: true },
     { key: 'origin', label: 'Origin', required: true },
     { key: 'destination', label: 'Destination', required: true },
-    { key: 'basePrice', label: 'Base Price', required: true },
-    { key: 'capacity', label: 'Capacity' },
+    { 
+      key: 'prices', 
+      label: 'Prices',
+      render: (_v, item) => {
+        const p4 = item.price4Seater ?? item.basePrice;
+        const p6l = item.price6SeaterLuxurySuv ?? item.basePrice;
+        const p610 = item.price6to10SeaterSuv ?? item.basePrice;
+        return `₹${p4} | ₹${p6l} | ₹${p610}`;
+      }
+    },
+    { key: 'capacity', label: 'Default Vehicle' },
     // Route display config for table
   ],
   direct: [
     { key: 'name', label: 'Route Name', required: true },
     { key: 'origin', label: 'Origin', required: true },
     { key: 'destination', label: 'Destination', required: true },
-    { key: 'basePrice', label: 'Base Price', required: true },
-    { key: 'capacity', label: 'Capacity' },
+    { 
+      key: 'prices', 
+      label: 'Prices',
+      render: (_v, item) => {
+        const p4 = item.price4Seater ?? item.basePrice;
+        const p6l = item.price6SeaterLuxurySuv ?? item.basePrice;
+        const p610 = item.price6to10SeaterSuv ?? item.basePrice;
+        return `₹${p4} | ₹${p6l} | ₹${p610}`;
+      }
+    },
+    { key: 'capacity', label: 'Default Vehicle' },
   ]
 };
 
@@ -255,6 +275,8 @@ const AdminDashboard = () => {
                 setEditingItem(null);
             }}
           />
+        ) : activeTab === 'bookings' ? (
+          <BookingsManagement />
         ) : (
           <>
             {(activeTab === 'routes' || activeTab === 'direct') && routeError && (

@@ -2,10 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { routeService } from '../services/routeService';
 import { ArrowRight, Users, Route } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import CarTypeModal from './CarTypeModal';
 
 const PopularRoutes = () => {
   const [routes, setRoutes] = useState([]);
   const navigate = useNavigate();
+  const [carModalOpen, setCarModalOpen] = useState(false);
+  const [activeRoute, setActiveRoute] = useState(null);
+
+  const formatPrices = (route) => {
+    const p4 = route.price4Seater ?? route.basePrice;
+    const p6l = route.price6SeaterLuxurySuv ?? route.basePrice;
+    const p610 = route.price6to10SeaterSuv ?? route.basePrice;
+    return `₹${p4} / ₹${p6l} / ₹${p610}`;
+  };
 
   useEffect(() => {
     const fetchRoutes = async () => {
@@ -22,6 +32,23 @@ const PopularRoutes = () => {
   }, []);
 
   if (routes.length === 0) return null;
+
+  const openCarPicker = (route) => {
+    setActiveRoute(route);
+    setCarModalOpen(true);
+  };
+
+  const closeCarPicker = () => {
+    setCarModalOpen(false);
+    setActiveRoute(null);
+  };
+
+  const handleSelectCar = (capacity) => {
+    if (!activeRoute) return;
+    const url = `/route/${activeRoute.id}?capacity=${encodeURIComponent(capacity)}`;
+    closeCarPicker();
+    navigate(url);
+  };
 
   return (
     <section className="py-12 bg-white relative z-20 border-b border-gray-100">
@@ -50,7 +77,7 @@ const PopularRoutes = () => {
                     </div>
                  )}
                  <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-primary shadow-sm">
-                    ₹{route.basePrice}
+                    {formatPrices(route)}
                  </div>
               </div>
 
@@ -77,15 +104,31 @@ const PopularRoutes = () => {
                         <Users className="w-4 h-4" /> 
                         <span>{route.capacity}</span>
                     </div>
-                    <span className="flex items-center gap-1 text-sm text-primary font-bold group-hover:gap-2 transition-all">
+                    <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          openCarPicker(route);
+                        }}
+                        className="flex items-center gap-1 text-sm text-primary font-bold group-hover:gap-2 transition-all"
+                    >
                         Book Now <ArrowRight className="w-4 h-4" />
-                    </span>
+                    </button>
                 </div>
               </div>
             </div>
           ))}
         </div>
       </div>
+      <CarTypeModal
+        isOpen={carModalOpen}
+        onClose={closeCarPicker}
+        route={activeRoute}
+        selectedCapacity={activeRoute?.capacity}
+        onSelect={handleSelectCar}
+        title="Select car & continue"
+      />
     </section>
   );
 };

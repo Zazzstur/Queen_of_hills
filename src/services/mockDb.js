@@ -374,7 +374,7 @@ export const mockDb = {
     if (!stopData.name || stopData.name.trim() === "") {
         return { data: null, error: new Error("Validation Error: Stop name is required") };
     }
-    if (stopData.detourPrice < 0) {
+    if (stopData.price4Seater < 0 || stopData.price6SeaterLuxurySuv < 0 || stopData.price6to10SeaterSuv < 0) {
         return { data: null, error: new Error("Validation Error: Price cannot be negative") };
     }
 

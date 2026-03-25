@@ -15,7 +15,9 @@ const AddRouteForm = ({ onCancel, onComplete, initialData, defaultType = 'sights
   const [editingStopId, setEditingStopId] = useState(null);
   const [currentStop, setCurrentStop] = useState({
     name: '',
-    detourPrice: '',
+    price4Seater: '',
+    price6SeaterLuxurySuv: '',
+    price6to10SeaterSuv: '',
     description: '',
     images: [] // { file, preview, id, url }
   });
@@ -112,7 +114,9 @@ const AddRouteForm = ({ onCancel, onComplete, initialData, defaultType = 'sights
   const handleEditStop = (stop) => {
       setCurrentStop({
           name: stop.name,
-          detourPrice: stop.detourPrice || '',
+          price4Seater: stop.price4Seater || '',
+          price6SeaterLuxurySuv: stop.price6SeaterLuxurySuv || '',
+          price6to10SeaterSuv: stop.price6to10SeaterSuv || '',
           description: stop.description || '',
           images: stop.images?.map(img => ({ ...img, preview: img.url })) || []
       });
@@ -138,7 +142,9 @@ const AddRouteForm = ({ onCancel, onComplete, initialData, defaultType = 'sights
           const payload = {
               routeId: createdRoute.id,
               name: currentStop.name,
-              detourPrice: Number(currentStop.detourPrice) || 0,
+              price4Seater: Number(currentStop.price4Seater) || 0,
+              price6SeaterLuxurySuv: Number(currentStop.price6SeaterLuxurySuv) || 0,
+              price6to10SeaterSuv: Number(currentStop.price6to10SeaterSuv) || 0,
               description: currentStop.description
           };
 
@@ -171,7 +177,7 @@ const AddRouteForm = ({ onCancel, onComplete, initialData, defaultType = 'sights
           
           setIsAddingStop(false);
           setEditingStopId(null);
-          setCurrentStop({ name: '', detourPrice: '', description: '', images: [] });
+          setCurrentStop({ name: '', price4Seater: '', price6SeaterLuxurySuv: '', price6to10SeaterSuv: '', description: '', images: [] });
           showNotification('success', 'Stop saved successfully');
 
       } catch (err) {
@@ -185,7 +191,7 @@ const AddRouteForm = ({ onCancel, onComplete, initialData, defaultType = 'sights
   const handleCancelStop = () => {
       setIsAddingStop(false);
       setEditingStopId(null);
-      setCurrentStop({ name: '', detourPrice: '', description: '', images: [] });
+      setCurrentStop({ name: '', price4Seater: '', price6SeaterLuxurySuv: '', price6to10SeaterSuv: '', description: '', images: [] });
   };
 
   return (
@@ -248,7 +254,7 @@ const AddRouteForm = ({ onCancel, onComplete, initialData, defaultType = 'sights
                             {editingStopId ? 'Edit Stop' : 'New Stop Details'}
                         </h3>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div className="grid grid-cols-1 gap-4 mb-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Stop Name <span className="text-red-500">*</span></label>
                                 <input
@@ -260,17 +266,44 @@ const AddRouteForm = ({ onCancel, onComplete, initialData, defaultType = 'sights
                                     placeholder="e.g. Lamahatta Eco Park"
                                 />
                             </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Detour Price (₹)</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">4 Seater Price (₹)</label>
                                 <input
                                     type="number"
-                                    name="detourPrice"
-                                    value={currentStop.detourPrice}
+                                    name="price4Seater"
+                                    value={currentStop.price4Seater}
                                     onChange={handleStopChange}
                                     className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
                                     placeholder="0"
+                                    min="0"
                                 />
-                                <p className="text-xs text-gray-500 mt-1">Leave as 0 if included.</p>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">6 Seater Luxury (₹)</label>
+                                <input
+                                    type="number"
+                                    name="price6SeaterLuxurySuv"
+                                    value={currentStop.price6SeaterLuxurySuv}
+                                    onChange={handleStopChange}
+                                    className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                                    placeholder="0"
+                                    min="0"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">6–10 Seater SUV (₹)</label>
+                                <input
+                                    type="number"
+                                    name="price6to10SeaterSuv"
+                                    value={currentStop.price6to10SeaterSuv}
+                                    onChange={handleStopChange}
+                                    className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                                    placeholder="0"
+                                    min="0"
+                                />
                             </div>
                         </div>
 
@@ -348,9 +381,9 @@ const AddRouteForm = ({ onCancel, onComplete, initialData, defaultType = 'sights
                                             <div>
                                                 <div className="flex items-center gap-3 mb-1">
                                                     <h4 className="font-bold text-lg text-gray-800">{stop.name}</h4>
-                                                    {stop.detourPrice > 0 ? (
+                                                    {((Number(stop.price4Seater) || 0) + (Number(stop.price6SeaterLuxurySuv) || 0) + (Number(stop.price6to10SeaterSuv) || 0)) > 0 ? (
                                                         <span className="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full font-medium border border-green-100">
-                                                            +₹{stop.detourPrice}
+                                                            ₹{Number(stop.price4Seater) || 0} / ₹{Number(stop.price6SeaterLuxurySuv) || 0} / ₹{Number(stop.price6to10SeaterSuv) || 0}
                                                         </span>
                                                     ) : (
                                                         <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-medium">
@@ -362,8 +395,14 @@ const AddRouteForm = ({ onCancel, onComplete, initialData, defaultType = 'sights
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            {/* Edit disabled for now as updateStop is missing in mockDb */}
-                                            {/* <button onClick={() => handleEditStop(stop)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-md"><Pencil className="w-4 h-4" /></button> */}
+                                            <button
+                                                type="button"
+                                                onClick={() => handleEditStop(stop)}
+                                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-md"
+                                                title="Edit stop"
+                                            >
+                                                <Pencil className="w-4 h-4" />
+                                            </button>
                                             <button onClick={() => handleDeleteStop(stop.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-md"><Trash2 className="w-4 h-4" /></button>
                                         </div>
                                     </div>

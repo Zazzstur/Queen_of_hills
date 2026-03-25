@@ -45,8 +45,7 @@ const checks = {
       console.warn('⚠️  Warning: No local .env files found. Ensure environment variables are set in Cloudflare Dashboard.');
     }
 
-    // Check for VITE_SUPABASE_URL usage
-    console.log('ℹ️  Note: Ensure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set in Cloudflare Dashboard for build process.');
+    console.log('ℹ️  Note: Ensure VITE_CONVEX_URL is set for Convex.');
   },
 
   buildOutput: () => {

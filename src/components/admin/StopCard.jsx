@@ -7,7 +7,9 @@ import { routeService } from '../../services/routeService';
 
 const stopSchema = z.object({
   name: z.string().min(1, 'Stop name is required'),
-  detourPrice: z.coerce.number().min(0, 'Price must be 0 or more'),
+  price4Seater: z.coerce.number().min(0, 'Price must be 0 or more').optional(),
+  price6SeaterLuxurySuv: z.coerce.number().min(0, 'Price must be 0 or more').optional(),
+  price6to10SeaterSuv: z.coerce.number().min(0, 'Price must be 0 or more').optional(),
   description: z.string().optional(),
 });
 
@@ -21,7 +23,9 @@ const StopCard = ({ routeId, onSuccess, onCancel }) => {
     resolver: zodResolver(stopSchema),
     defaultValues: {
       name: '',
-      detourPrice: 0,
+      price4Seater: 0,
+      price6SeaterLuxurySuv: 0,
+      price6to10SeaterSuv: 0,
       description: '',
     }
   });
@@ -153,7 +157,7 @@ const StopCard = ({ routeId, onSuccess, onCancel }) => {
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6">
           <div className="space-y-1">
             <label className="block text-sm font-medium text-gray-700">Stop Name <span className="text-red-500">*</span></label>
             <input 
@@ -163,16 +167,41 @@ const StopCard = ({ routeId, onSuccess, onCancel }) => {
             />
             {errors.name && <p className="text-red-500 text-xs">{errors.name.message}</p>}
           </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="space-y-1">
-            <label className="block text-sm font-medium text-gray-700">Detour Price (₹)</label>
-            <input 
+            <label className="block text-sm font-medium text-gray-700">4 Seater Price (₹)</label>
+            <input
               type="number"
-              {...register('detourPrice')}
+              {...register('price4Seater')}
               className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
               placeholder="0"
+              min="0"
             />
-            {errors.detourPrice && <p className="text-red-500 text-xs">{errors.detourPrice.message}</p>}
-            <p className="text-xs text-gray-500">Leave as 0 if included in base price.</p>
+            {errors.price4Seater && <p className="text-red-500 text-xs">{errors.price4Seater.message}</p>}
+          </div>
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-gray-700">6 Seater Luxury (₹)</label>
+            <input
+              type="number"
+              {...register('price6SeaterLuxurySuv')}
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+              placeholder="0"
+              min="0"
+            />
+            {errors.price6SeaterLuxurySuv && <p className="text-red-500 text-xs">{errors.price6SeaterLuxurySuv.message}</p>}
+          </div>
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-gray-700">6–10 Seater SUV (₹)</label>
+            <input
+              type="number"
+              {...register('price6to10SeaterSuv')}
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+              placeholder="0"
+              min="0"
+            />
+            {errors.price6to10SeaterSuv && <p className="text-red-500 text-xs">{errors.price6to10SeaterSuv.message}</p>}
           </div>
         </div>
 

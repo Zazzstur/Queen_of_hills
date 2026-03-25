@@ -1,6 +1,7 @@
 import { mockDb } from './mockDb';
-import { supabase } from '../lib/supabase';
 import { executeWithRetry } from '../lib/dbHelper';
+import { getConvex } from '../lib/convex';
+import { api } from '../../convex/_generated/api';
 
 // Toggle this to switch between Local and Supabase
 // Default to true if not specified in env
@@ -8,8 +9,9 @@ const USE_LOCAL_DB = import.meta.env.VITE_USE_LOCAL_DB !== 'false';
 
 // If running in production (Cloudflare Pages), assume Supabase unless explicitly overridden
 const isProduction = import.meta.env.PROD; 
+const isTest = import.meta.env.MODE === 'test' || import.meta.env.VITEST;
 // If it's production and VITE_USE_LOCAL_DB is NOT explicitly set to 'true', force Supabase
-const effectiveUseLocalDb = isProduction ? (import.meta.env.VITE_USE_LOCAL_DB === 'true') : USE_LOCAL_DB;
+const effectiveUseLocalDb = isTest ? true : (isProduction ? (import.meta.env.VITE_USE_LOCAL_DB === 'true') : USE_LOCAL_DB);
 
 
 export const stayService = {
@@ -18,7 +20,10 @@ export const stayService = {
       return mockDb.createStay(stayData);
     }
     return executeWithRetry(
-      () => supabase.from('stays').insert([stayData]).select().single(),
+      async () => ({
+        data: await getConvex().mutation(api.stays.createStay, stayData),
+        error: null,
+      }),
       'Create Stay'
     );
   },
@@ -28,7 +33,10 @@ export const stayService = {
       return mockDb.getStays();
     }
     return executeWithRetry(
-      () => supabase.from('stays').select('*'),
+      async () => ({
+        data: await getConvex().query(api.stays.getStays, {}),
+        error: null,
+      }),
       'Get Stays'
     );
   },
@@ -38,7 +46,18 @@ export const stayService = {
       return mockDb.updateStay(id, updates);
     }
     return executeWithRetry(
-      () => supabase.from('stays').update(updates).eq('id', id).select().single(),
+      async () => ({
+        data: await getConvex().mutation(api.stays.updateStay, {
+          id,
+          name: updates.name,
+          description: updates.description,
+          type: updates.type,
+          location: updates.location,
+          amenities: updates.amenities,
+          thumbnail_url: updates.thumbnail_url,
+        }),
+        error: null,
+      }),
       `Update Stay ${id}`
     );
   },
@@ -48,7 +67,16 @@ export const stayService = {
       return mockDb.createRoom(roomData);
     }
     return executeWithRetry(
-      () => supabase.from('rooms').insert([roomData]).select().single(),
+      async () => ({
+        data: await getConvex().mutation(api.stays.createRoom, {
+          stayId: roomData.stay_id,
+          name: roomData.name,
+          price: roomData.price,
+          capacity: roomData.capacity,
+          description: roomData.description,
+        }),
+        error: null,
+      }),
       'Create Room'
     );
   },
@@ -58,7 +86,16 @@ export const stayService = {
       return mockDb.updateRoom(id, updates);
     }
     return executeWithRetry(
-      () => supabase.from('rooms').update(updates).eq('id', id).select().single(),
+      async () => ({
+        data: await getConvex().mutation(api.stays.updateRoom, {
+          id,
+          name: updates.name,
+          price: updates.price,
+          capacity: updates.capacity,
+          description: updates.description,
+        }),
+        error: null,
+      }),
       `Update Room ${id}`
     );
   },
@@ -68,7 +105,10 @@ export const stayService = {
       return mockDb.deleteRoom(id);
     }
     return executeWithRetry(
-      () => supabase.from('rooms').delete().eq('id', id),
+      async () => ({
+        data: await getConvex().mutation(api.stays.deleteRoom, { id }),
+        error: null,
+      }),
       `Delete Room ${id}`
     );
   },
@@ -78,7 +118,10 @@ export const stayService = {
       return mockDb.getRoomsByStayId(stayId);
     }
     return executeWithRetry(
-      () => supabase.from('rooms').select('*').eq('stay_id', stayId),
+      async () => ({
+        data: await getConvex().query(api.stays.getRoomsByStayId, { stayId }),
+        error: null,
+      }),
       `Get Rooms for Stay ${stayId}`
     );
   },
@@ -88,15 +131,18 @@ export const stayService = {
       const { data } = await mockDb.uploadImage(file, path);
       return data.publicUrl;
     }
-    
-    const { data, error } = await executeWithRetry(
-      () => supabase.storage.from('stays').upload(path, file),
-      'Upload Image'
-    );
-    if (error) throw error;
-    
-    const { data: { publicUrl } } = supabase.storage.from('stays').getPublicUrl(data.path);
-    return publicUrl;
+
+    const uploadUrl = await getConvex().mutation(api.files.generateUploadUrl, {});
+    const result = await fetch(uploadUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': file.type || 'application/octet-stream' },
+      body: file,
+    });
+    if (!result.ok) throw new Error('Failed to upload image');
+    const { storageId } = await result.json();
+    const url = await getConvex().query(api.files.getFileUrl, { storageId });
+    if (!url) throw new Error('Failed to get uploaded image url');
+    return url;
   },
 
   async createRoomImage(imageData) {
@@ -104,7 +150,13 @@ export const stayService = {
       return mockDb.createRoomImage(imageData);
     }
     return executeWithRetry(
-      () => supabase.from('room_images').insert([imageData]),
+      async () => ({
+        data: await getConvex().mutation(api.stays.createRoomImage, {
+          roomId: imageData.room_id,
+          url: imageData.url,
+        }),
+        error: null,
+      }),
       'Create Room Image'
     );
   },
@@ -114,7 +166,10 @@ export const stayService = {
       return mockDb.getRoomImages(roomId);
     }
     return executeWithRetry(
-      () => supabase.from('room_images').select('*').eq('room_id', roomId),
+      async () => ({
+        data: await getConvex().query(api.stays.getRoomImages, { roomId }),
+        error: null,
+      }),
       `Get Images for Room ${roomId}`
     );
   },
@@ -124,7 +179,10 @@ export const stayService = {
       return mockDb.deleteRoomImage(id);
     }
     return executeWithRetry(
-      () => supabase.from('room_images').delete().eq('id', id),
+      async () => ({
+        data: await getConvex().mutation(api.stays.deleteRoomImage, { id }),
+        error: null,
+      }),
       `Delete Room Image ${id}`
     );
   }

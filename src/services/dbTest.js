@@ -35,13 +35,13 @@ export const runPersistenceTests = async () => {
 
     // Test 1: Validation - Missing Route ID
     console.log('Test 1: Creating stop without Route ID...');
-    const res1 = await mockDb.createStop({ name: 'Invalid Stop', detourPrice: 0 });
+    const res1 = await mockDb.createStop({ name: 'Invalid Stop', price4Seater: 0, price6SeaterLuxurySuv: 0, price6to10SeaterSuv: 0 });
     if (res1.error) console.log('✅ Pass: Correctly rejected missing Route ID');
     else console.error('❌ Fail: Allowed missing Route ID');
 
     // Test 2: Validation - Negative Price
     console.log('Test 2: Creating stop with negative price...');
-    const res2 = await mockDb.createStop({ routeId: testRouteId, name: 'Negative Price', detourPrice: -100 });
+    const res2 = await mockDb.createStop({ routeId: testRouteId, name: 'Negative Price', price4Seater: -100, price6SeaterLuxurySuv: 0, price6to10SeaterSuv: 0 });
     if (res2.error) console.log('✅ Pass: Correctly rejected negative price');
     else console.error('❌ Fail: Allowed negative price');
 
@@ -50,7 +50,9 @@ export const runPersistenceTests = async () => {
     const validStop = {
       routeId: testRouteId,
       name: 'Valid Stop ' + Date.now(),
-      detourPrice: 500,
+      price4Seater: 500,
+      price6SeaterLuxurySuv: 600,
+      price6to10SeaterSuv: 800,
       description: 'A test stop'
     };
     const res3 = await mockDb.createStop(validStop);

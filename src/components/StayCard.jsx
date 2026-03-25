@@ -91,10 +91,14 @@ const StayCard = ({ stay, onNavigate }) => {
                 {minPrice ? `₹${minPrice.toLocaleString()}` : (stay.price || 'On Request')}
             </div>
             <button 
-                onClick={() => onNavigate('stay-details', stay.id)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onNavigate('stay-details', stay.id);
+                }}
                 className="text-xs font-semibold text-accent flex items-center hover:underline mt-1 group/btn"
             >
-              View Details <ArrowRight className="w-3 h-3 ml-1 transform group-hover/btn:translate-x-1 transition-transform" />
+              Book Now <ArrowRight className="w-3 h-3 ml-1 transform group-hover/btn:translate-x-1 transition-transform" />
             </button>
           </div>
         </div>

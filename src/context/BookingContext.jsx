@@ -24,7 +24,8 @@ export const BookingProvider = ({ children }) => {
     contactDetails: {
         name: '',
         email: '',
-        phone: ''
+        phone: '',
+        pickupLocation: ''
     }
   });
 
@@ -40,7 +41,7 @@ export const BookingProvider = ({ children }) => {
         timeSlot: null,
         guests: 1,
         totalPrice: Number(service.price) || Number(service.basePrice) || 0,
-        contactDetails: { name: '', email: '', phone: '' }
+        contactDetails: { name: '', email: '', phone: '', pickupLocation: '' }
     });
     setCurrentStep(1);
   };

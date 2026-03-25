@@ -108,7 +108,9 @@ describe('Persistence Tests (Local DB)', () => {
         const stopData = {
             routeId: route.id,
             name: 'Stop 1',
-            detourPrice: 50,
+            price4Seater: 50,
+            price6SeaterLuxurySuv: 50,
+            price6to10SeaterSuv: 50,
             description: 'Desc'
         };
         const { data: stop, error: stopError } = await routeService.addStop(stopData);

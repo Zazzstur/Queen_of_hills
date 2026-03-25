@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Plus, MapPin, Image as ImageIcon, Minus } from 'lucide-react';
 
-const StopDisplayCard = ({ stop, onAdd, isSelected }) => {
+const StopDisplayCard = ({ stop, routeCapacity, onAdd, isSelected }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const carouselRef = useRef(null);
 
@@ -17,6 +17,16 @@ const StopDisplayCard = ({ stop, onAdd, isSelected }) => {
 
   const images = stop.images || [];
   const hasImages = images.length > 0;
+  const getStopPriceByCapacity = () => {
+    const p4 = stop.price4Seater ?? stop.detourPrice ?? 0;
+    const p6l = stop.price6SeaterLuxurySuv ?? stop.detourPrice ?? 0;
+    const p610 = stop.price6to10SeaterSuv ?? stop.detourPrice ?? 0;
+    const c = String(routeCapacity || '').toLowerCase();
+    if (c.includes('luxury')) return Number(p6l) || 0;
+    if (c.includes('6-10') || c.includes('6 to 10')) return Number(p610) || 0;
+    return Number(p4) || 0;
+  };
+  const stopPrice = getStopPriceByCapacity();
 
   return (
     <div className="w-full bg-white rounded-xl shadow-md overflow-hidden flex flex-col relative group transition-shadow hover:shadow-lg">
@@ -74,8 +84,8 @@ const StopDisplayCard = ({ stop, onAdd, isSelected }) => {
 
         {/* Price */}
         <div className="text-xl font-bold text-primary mb-2">
-            {stop.detourPrice > 0 ? `₹${stop.detourPrice}` : <span className="text-green-600 text-lg">Free</span>}
-            {stop.detourPrice > 0 && <span className="text-xs text-gray-500 font-normal ml-1">detour</span>}
+            {stopPrice > 0 ? `₹${stopPrice}` : <span className="text-green-600 text-lg">Free</span>}
+            {stopPrice > 0 && <span className="text-xs text-gray-500 font-normal ml-1">stop</span>}
         </div>
 
         {/* Description */}

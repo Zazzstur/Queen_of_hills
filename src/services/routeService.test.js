@@ -38,7 +38,7 @@ describe('routeService (Local DB)', () => {
     expect(error).toBeNull();
     expect(data).toHaveProperty('id');
     expect(data.origin).toBe('Darjeeling');
-    expect(data.createdAt).toBeDefined();
+    expect(data.created_at).toBeDefined();
   });
 
   it('should add a stop to a route', async () => {
@@ -56,7 +56,9 @@ describe('routeService (Local DB)', () => {
     const stopData = {
       routeId,
       name: 'Viewpoint',
-      detourPrice: 500,
+      price4Seater: 500,
+      price6SeaterLuxurySuv: 500,
+      price6to10SeaterSuv: 500,
       description: 'Nice view'
     };
 
@@ -79,8 +81,8 @@ describe('routeService (Local DB)', () => {
     const routeId = routeRes.data.id;
 
     // 2. Add Stops
-    await routeService.addStop({ routeId, name: 'Stop 1', detourPrice: 0 });
-    await routeService.addStop({ routeId, name: 'Stop 2', detourPrice: 0 });
+    await routeService.addStop({ routeId, name: 'Stop 1', price4Seater: 0, price6SeaterLuxurySuv: 0, price6to10SeaterSuv: 0 });
+    await routeService.addStop({ routeId, name: 'Stop 2', price4Seater: 0, price6SeaterLuxurySuv: 0, price6to10SeaterSuv: 0 });
 
     // 3. Get Stops
     const { data: stops, error } = await routeService.getStopsByRouteId(routeId);

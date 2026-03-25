@@ -1,19 +1,69 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { routeService } from '../services/routeService';
 import { useBooking } from '../context/BookingContext';
-import { ArrowLeft, MapPin, Clock, Info, Check } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, Info, Check, ChevronDown } from 'lucide-react';
 import StopDisplayCard from './StopDisplayCard';
+import CarTypeModal from './CarTypeModal';
+
+const CAR_OPTIONS = [
+  { label: '4 Seater', value: '4 Seater' },
+  { label: '6 Seater Luxury SUV', value: '6 Seater Luxury SUV' },
+  { label: '6-10 Seater SUV', value: '6-10 Seater SUV' },
+];
 
 const RouteDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { initializeBooking } = useBooking();
   const [route, setRoute] = useState(null);
   const [stops, setStops] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [selectedStops, setSelectedStops] = useState([]);
+  const [selectedCapacity, setSelectedCapacity] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  const normalizeCapacity = (capacity) => {
+    const c = String(capacity || '').toLowerCase();
+    if (c.includes('luxury')) return '6 Seater Luxury SUV';
+    if (c.includes('6-10') || c.includes('6 to 10') || c.includes('6–10')) return '6-10 Seater SUV';
+    if (c.includes('4')) return '4 Seater';
+    return '';
+  };
+
+  const getRoutePriceByCapacity = (r, capacity) => {
+    const p4 = r.price4Seater ?? r.basePrice;
+    const p6l = r.price6SeaterLuxurySuv ?? r.basePrice;
+    const p610 = r.price6to10SeaterSuv ?? r.basePrice;
+    const c = String(capacity || '').toLowerCase();
+    if (c.includes('luxury')) return Number(p6l) || 0;
+    if (c.includes('6-10') || c.includes('6 to 10')) return Number(p610) || 0;
+    return Number(p4) || 0;
+  };
+
+  const getPriceSet = (r) => ({
+    p4: r.price4Seater ?? r.basePrice,
+    p6l: r.price6SeaterLuxurySuv ?? r.basePrice,
+    p610: r.price6to10SeaterSuv ?? r.basePrice,
+  });
+
+  const getStopPriceByCapacity = (stop, capacity) => {
+    const p4 = stop.price4Seater ?? stop.detourPrice ?? 0;
+    const p6l = stop.price6SeaterLuxurySuv ?? stop.detourPrice ?? 0;
+    const p610 = stop.price6to10SeaterSuv ?? stop.detourPrice ?? 0;
+    const c = String(capacity || '').toLowerCase();
+    if (c.includes('luxury')) return Number(p6l) || 0;
+    if (c.includes('6-10') || c.includes('6 to 10')) return Number(p610) || 0;
+    return Number(p4) || 0;
+  };
+
+  useEffect(() => {
+    const fromQuery = new URLSearchParams(location.search).get('capacity');
+    const normalized = normalizeCapacity(fromQuery);
+    if (normalized) setSelectedCapacity(normalized);
+  }, [location.search]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,6 +89,7 @@ const RouteDetails = () => {
             }));
 
             setStops(stopsWithImages);
+            setSelectedCapacity((prev) => prev || normalizeCapacity(foundRoute.capacity) || '4 Seater');
         } else {
              console.error("Route not found in list:", routes);
         }
@@ -61,16 +112,39 @@ const RouteDetails = () => {
       }
   };
 
-  const totalPrice = route ? (Number(route.basePrice) + selectedStops.reduce((sum, stop) => sum + (Number(stop.detourPrice) || 0), 0)) : 0;
+  const basePrice = route ? getRoutePriceByCapacity(route, selectedCapacity || route.capacity) : 0;
+  const stopsTotal = route
+    ? selectedStops.reduce((sum, stop) => sum + getStopPriceByCapacity(stop, selectedCapacity || route.capacity), 0)
+    : 0;
+  const totalPrice = route ? (basePrice + stopsTotal) : 0;
 
-  const handleBookNow = () => {
-    // Pass the full route details + selected stops calculation
+  const proceedToBooking = (capacityOverride) => {
+    if (!route) return;
+    const capacity = capacityOverride || selectedCapacity || route.capacity;
+    const b = getRoutePriceByCapacity(route, capacity);
+    const s = selectedStops.reduce((sum, stop) => sum + getStopPriceByCapacity(stop, capacity), 0);
+    const t = b + s;
+
     initializeBooking('route', {
-        ...route,
-        totalPrice: totalPrice, // Use the calculated total with stops
-        selectedStops: selectedStops // Pass stops for record
+      ...route,
+      capacity,
+      basePrice: b,
+      totalPrice: t,
+      selectedStops,
     });
     navigate('/book');
+  };
+
+  const handleBookNow = () => {
+    proceedToBooking();
+  };
+
+  const handleSelectCar = (capacity) => {
+    setSelectedCapacity(capacity);
+    setShowDropdown(false);
+    if (route) {
+      navigate(`/route/${route.id}?capacity=${encodeURIComponent(capacity)}`, { replace: true });
+    }
   };
 
   if (loading) {
@@ -106,7 +180,7 @@ const RouteDetails = () => {
                 {route.type === 'direct' ? 'Direct Travel' : 'Sight Seeing'}
             </span>
             <span>•</span>
-            <span>Capacity: {route.capacity}</span>
+            <span>Capacity: {selectedCapacity || route.capacity}</span>
         </p>
       </div>
 
@@ -122,13 +196,54 @@ const RouteDetails = () => {
                         <div className="text-right">
                             <span className="font-bold text-primary text-xl">₹{totalPrice}</span>
                             {selectedStops.length > 0 && (
-                                <p className="text-xs text-gray-500">(Base ₹{route.basePrice} + Stops ₹{totalPrice - route.basePrice})</p>
+                                <p className="text-xs text-gray-500">(Base ₹{basePrice} + Stops ₹{stopsTotal})</p>
                             )}
                         </div>
                     </div>
                     <div className="flex justify-between border-b border-gray-100 pb-2">
+                        <span className="text-gray-500">Prices</span>
+                        <div className="text-right text-sm text-gray-800">
+                            {(() => {
+                              const { p4, p6l, p610 } = getPriceSet(route);
+                              return (
+                                <>
+                                  <div>4 Seater: ₹{p4}</div>
+                                  <div>6 Seater Luxury SUV: ₹{p6l}</div>
+                                  <div>6-10 Seater SUV: ₹{p610}</div>
+                                </>
+                              );
+                            })()}
+                        </div>
+                    </div>
+                    <div className="flex justify-between border-b border-gray-100 pb-2 relative">
                         <span className="text-gray-500">Vehicle Type</span>
-                        <span className="font-bold text-gray-800">{route.capacity}</span>
+                        <div className="relative">
+                            <button
+                              type="button"
+                              onClick={() => setShowDropdown(!showDropdown)}
+                              className="font-bold text-gray-800 hover:text-primary transition-colors flex items-center gap-1"
+                            >
+                              {selectedCapacity || route.capacity}
+                              <ChevronDown className={`w-4 h-4 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
+                            </button>
+                            {showDropdown && (
+                                <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-100 rounded-lg shadow-xl z-50 py-2">
+                                    {CAR_OPTIONS.map(opt => (
+                                        <button
+                                            key={opt.value}
+                                            onClick={() => handleSelectCar(opt.value)}
+                                            className={`w-full text-left px-4 py-2 hover:bg-gray-50 text-sm ${
+                                                (selectedCapacity || route.capacity) === opt.value 
+                                                    ? 'text-primary font-bold bg-primary/5' 
+                                                    : 'text-gray-700'
+                                            }`}
+                                        >
+                                            {opt.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
                      <div className="pt-2">
                         <span className="block text-gray-500 mb-1">Description</span>
@@ -170,6 +285,7 @@ const RouteDetails = () => {
                             {/* New Responsive Stop Card */}
                             <StopDisplayCard 
                                 stop={stop} 
+                                routeCapacity={selectedCapacity || route.capacity}
                                 onAdd={handleAddStop}
                                 isSelected={selectedStops.some(s => s.id === stop.id)}
                             />

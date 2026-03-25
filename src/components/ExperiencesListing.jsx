@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { stayService } from '../services/stayService';
 import { routeService } from '../services/routeService';
 import StayCard from './StayCard';
+import CarTypeModal from './CarTypeModal';
 import { Filter, Star, Clock, Users, ArrowRight, Bed, ChevronDown, Route, Car } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -182,6 +183,23 @@ const FilterStrip = ({ activeFilter, setActiveFilter }) => {
 };
 
 const TicketCard = ({ item, category, onNavigate }) => {
+  const navigate = useNavigate();
+  const [carModalOpen, setCarModalOpen] = useState(false);
+  const [selectedCapacity, setSelectedCapacity] = useState('');
+
+  const normalizeCapacity = (capacity) => {
+    const c = String(capacity || '').toLowerCase();
+    if (c.includes('luxury')) return '6 Seater Luxury SUV';
+    if (c.includes('6-10') || c.includes('6 to 10') || c.includes('6–10')) return '6-10 Seater SUV';
+    if (c.includes('4')) return '4 Seater';
+    return '';
+  };
+
+  useEffect(() => {
+    const normalized = normalizeCapacity(item?.capacity);
+    setSelectedCapacity(normalized || '');
+  }, [item?.id]);
+
   // Visual patterns based on category
   const getVisualPattern = () => {
     switch (category) {
@@ -220,8 +238,23 @@ const TicketCard = ({ item, category, onNavigate }) => {
       }
   };
 
+  const handleBookNow = () => {
+    if (category === 'routes' || category === 'direct') {
+      setCarModalOpen(true);
+      return;
+    }
+    handleViewDetails();
+  };
+
+  const handleSelectCar = (capacity) => {
+    setSelectedCapacity(capacity);
+    setCarModalOpen(false);
+    navigate(`/route/${item.id}?capacity=${encodeURIComponent(capacity)}`);
+  };
+
   return (
-    <div className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col md:flex-row h-full">
+    <>
+      <div className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col md:flex-row h-full">
       {/* Visual Area (Left/Top) */}
       <div 
         className="h-40 md:h-auto md:w-1/3 relative flex items-center justify-center overflow-hidden"
@@ -284,16 +317,30 @@ const TicketCard = ({ item, category, onNavigate }) => {
           
           <div className="text-right">
             <div className="text-lg font-bold text-primary">{item.price}</div>
-            <button 
-                onClick={handleViewDetails}
+            <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleBookNow();
+                }}
                 className="text-xs font-semibold text-accent flex items-center hover:underline mt-1 group/btn"
             >
-              View Details <ArrowRight className="w-3 h-3 ml-1 transform group-hover/btn:translate-x-1 transition-transform" />
+              Book Now <ArrowRight className="w-3 h-3 ml-1 transform group-hover/btn:translate-x-1 transition-transform" />
             </button>
           </div>
         </div>
       </div>
-    </div>
+      </div>
+
+      <CarTypeModal
+        isOpen={carModalOpen}
+        onClose={() => setCarModalOpen(false)}
+        route={item}
+        selectedCapacity={selectedCapacity}
+        onSelect={handleSelectCar}
+        title="Choose Vehicle"
+      />
+    </>
   );
 };
 
@@ -352,6 +399,13 @@ const ExperiencesListing = ({ initialCategory = 'stays', onNavigate }) => {
 
   const filteredData = useMemo(() => {
     let data = [];
+
+    const formatPrices = (route) => {
+        const p4 = route.price4Seater ?? route.basePrice;
+        const p6l = route.price6SeaterLuxurySuv ?? route.basePrice;
+        const p610 = route.price6to10SeaterSuv ?? route.basePrice;
+        return `₹${p4} | ₹${p6l} | ₹${p610}`;
+    };
     
     if (activeCategory === 'stays') {
         data = realStays;
@@ -363,12 +417,18 @@ const ExperiencesListing = ({ initialCategory = 'stays', onNavigate }) => {
                 id: route.id,
                 title: route.name || `${route.origin} to ${route.destination}`,
                 type: 'Sight Seeing', // or route.type if available
-                price: `₹${route.basePrice}`,
+                price: formatPrices(route),
                 duration: 'Flexible', // Route doesn't have duration in schema, maybe add or mock
                 capacity: route.capacity,
                 description: route.description || `Journey from ${route.origin} to ${route.destination}`,
                 tags: ['Route', 'Travel'], // Mock tags
                 image: route.coverImage,
+                origin: route.origin,
+                destination: route.destination,
+                basePrice: route.basePrice,
+                price4Seater: route.price4Seater,
+                price6SeaterLuxurySuv: route.price6SeaterLuxurySuv,
+                price6to10SeaterSuv: route.price6to10SeaterSuv,
                 // Add other fields required by TicketCard if any
             }));
     } else if (activeCategory === 'direct') {
@@ -378,12 +438,18 @@ const ExperiencesListing = ({ initialCategory = 'stays', onNavigate }) => {
                 id: route.id,
                 title: route.name || `${route.origin} to ${route.destination}`,
                 type: 'Direct Travel',
-                price: `₹${route.basePrice}`,
+                price: formatPrices(route),
                 duration: 'Point to Point',
                 capacity: route.capacity,
                 description: route.description || `Direct travel from ${route.origin} to ${route.destination}`,
                 tags: ['Direct', 'Transfer'],
                 image: route.coverImage,
+                origin: route.origin,
+                destination: route.destination,
+                basePrice: route.basePrice,
+                price4Seater: route.price4Seater,
+                price6SeaterLuxurySuv: route.price6SeaterLuxurySuv,
+                price6to10SeaterSuv: route.price6to10SeaterSuv,
             }));
     } else {
         data = [];

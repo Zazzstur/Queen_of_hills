@@ -1,6 +1,7 @@
 import { mockDb } from './mockDb';
-import { supabase } from '../lib/supabase';
 import { executeWithRetry } from '../lib/dbHelper';
+import { getConvex } from '../lib/convex';
+import { api } from '../../convex/_generated/api';
 
 // Toggle this to switch between Local and Supabase
 // Default to true if not specified in env
@@ -8,8 +9,9 @@ const USE_LOCAL_DB = import.meta.env.VITE_USE_LOCAL_DB !== 'false';
 
 // If running in production (Cloudflare Pages), assume Supabase unless explicitly overridden
 const isProduction = import.meta.env.PROD; 
+const isTest = import.meta.env.MODE === 'test' || import.meta.env.VITEST;
 // If it's production and VITE_USE_LOCAL_DB is NOT explicitly set to 'true', force Supabase
-const effectiveUseLocalDb = isProduction ? (import.meta.env.VITE_USE_LOCAL_DB === 'true') : USE_LOCAL_DB;
+const effectiveUseLocalDb = isTest ? true : (isProduction ? (import.meta.env.VITE_USE_LOCAL_DB === 'true') : USE_LOCAL_DB);
 
 export const routeService = {
   // Route Actions
@@ -18,7 +20,21 @@ export const routeService = {
       return mockDb.createRoute(routeData);
     }
     return executeWithRetry(
-      () => supabase.from('routes').insert([routeData]).select().single(),
+      async () => ({
+        data: await getConvex().mutation(api.routes.createRoute, {
+          name: routeData.name,
+          type: routeData.type,
+          origin: routeData.origin,
+          destination: routeData.destination,
+          price4Seater: routeData.price4Seater,
+          price6SeaterLuxurySuv: routeData.price6SeaterLuxurySuv,
+          price6to10SeaterSuv: routeData.price6to10SeaterSuv,
+          capacity: routeData.capacity,
+          description: routeData.description,
+          coverImage: routeData.coverImage,
+        }),
+        error: null,
+      }),
       'Create Route'
     );
   },
@@ -28,7 +44,10 @@ export const routeService = {
       return mockDb.getRoutes();
     }
     return executeWithRetry(
-      () => supabase.from('routes').select('*').order('created_at', { ascending: false }),
+      async () => ({
+        data: await getConvex().query(api.routes.getRoutes, {}),
+        error: null,
+      }),
       'Get Routes'
     );
   },
@@ -38,7 +57,22 @@ export const routeService = {
       return mockDb.updateRoute(id, updates);
     }
     return executeWithRetry(
-      () => supabase.from('routes').update(updates).eq('id', id).select().single(),
+      async () => ({
+        data: await getConvex().mutation(api.routes.updateRoute, {
+          id,
+          name: updates.name,
+          type: updates.type,
+          origin: updates.origin,
+          destination: updates.destination,
+          price4Seater: updates.price4Seater,
+          price6SeaterLuxurySuv: updates.price6SeaterLuxurySuv,
+          price6to10SeaterSuv: updates.price6to10SeaterSuv,
+          capacity: updates.capacity,
+          description: updates.description,
+          coverImage: updates.coverImage,
+        }),
+        error: null,
+      }),
       `Update Route ${id}`
     );
   },
@@ -48,7 +82,10 @@ export const routeService = {
       return mockDb.deleteRoute(id);
     }
     return executeWithRetry(
-      () => supabase.from('routes').delete().eq('id', id),
+      async () => ({
+        data: await getConvex().mutation(api.routes.deleteRoute, { id }),
+        error: null,
+      }),
       `Delete Route ${id}`
     );
   },
@@ -83,7 +120,17 @@ export const routeService = {
     delete dbData.routeId;
     
     return executeWithRetry(
-      () => supabase.from('stops').insert([dbData]).select().single(),
+      async () => ({
+        data: await getConvex().mutation(api.routes.addStop, {
+          routeId: sanitizedData.routeId,
+          name: sanitizedData.name,
+          price4Seater: sanitizedData.price4Seater,
+          price6SeaterLuxurySuv: sanitizedData.price6SeaterLuxurySuv,
+          price6to10SeaterSuv: sanitizedData.price6to10SeaterSuv,
+          description: sanitizedData.description,
+        }),
+        error: null,
+      }),
       'Add Stop'
     );
   },
@@ -93,7 +140,10 @@ export const routeService = {
       return mockDb.getStopsByRouteId(routeId);
     }
     return executeWithRetry(
-      () => supabase.from('stops').select('*').eq('route_id', routeId),
+      async () => ({
+        data: await getConvex().query(api.routes.getStopsByRouteId, { routeId }),
+        error: null,
+      }),
       `Get Stops for Route ${routeId}`
     );
   },
@@ -110,7 +160,17 @@ export const routeService = {
     }
 
     return executeWithRetry(
-      () => supabase.from('stops').update(dbUpdates).eq('id', id).select().single(),
+      async () => ({
+        data: await getConvex().mutation(api.routes.updateStop, {
+          id,
+          name: dbUpdates.name,
+          price4Seater: dbUpdates.price4Seater,
+          price6SeaterLuxurySuv: dbUpdates.price6SeaterLuxurySuv,
+          price6to10SeaterSuv: dbUpdates.price6to10SeaterSuv,
+          description: dbUpdates.description,
+        }),
+        error: null,
+      }),
       `Update Stop ${id}`
     );
   },
@@ -120,7 +180,10 @@ export const routeService = {
       return mockDb.deleteStop(id);
     }
     return executeWithRetry(
-      () => supabase.from('stops').delete().eq('id', id),
+      async () => ({
+        data: await getConvex().mutation(api.routes.deleteStop, { id }),
+        error: null,
+      }),
       `Delete Stop ${id}`
     );
   },
@@ -132,15 +195,18 @@ export const routeService = {
       const { data } = await mockDb.uploadImage(file, path);
       return data.publicUrl;
     }
-    
-    const { data, error } = await executeWithRetry(
-      () => supabase.storage.from('routes').upload(path, file),
-      'Upload Image'
-    );
-    if (error) throw error;
-    
-    const { data: { publicUrl } } = supabase.storage.from('routes').getPublicUrl(data.path);
-    return publicUrl;
+
+    const uploadUrl = await getConvex().mutation(api.files.generateUploadUrl, {});
+    const result = await fetch(uploadUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': file.type || 'application/octet-stream' },
+      body: file,
+    });
+    if (!result.ok) throw new Error('Failed to upload image');
+    const { storageId } = await result.json();
+    const url = await getConvex().query(api.files.getFileUrl, { storageId });
+    if (!url) throw new Error('Failed to get uploaded image url');
+    return url;
   },
 
   async addStopImages(imagesDataArray) {
@@ -153,13 +219,13 @@ export const routeService = {
         }
         return { data: results, error: null };
     }
-    // Map stopId to stop_id
-    const dbImages = imagesDataArray.map(img => ({
-        stop_id: img.stopId,
-        url: img.url
-    }));
     return executeWithRetry(
-      () => supabase.from('stop_images').insert(dbImages).select(),
+      async () => ({
+        data: await getConvex().mutation(api.routes.addStopImages, {
+          images: imagesDataArray,
+        }),
+        error: null,
+      }),
       'Add Stop Images'
     );
   },
@@ -169,7 +235,10 @@ export const routeService = {
       return mockDb.getStopImages(stopId);
     }
     return executeWithRetry(
-      () => supabase.from('stop_images').select('*').eq('stop_id', stopId),
+      async () => ({
+        data: await getConvex().query(api.routes.getStopImages, { stopId }),
+        error: null,
+      }),
       `Get Images for Stop ${stopId}`
     );
   }
