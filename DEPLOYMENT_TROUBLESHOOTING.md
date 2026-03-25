@@ -22,7 +22,7 @@ This will check:
 If the build fails on Cloudflare:
 1.  **Check Environment Variables**:
     - Go to **Cloudflare Dashboard** > **Pages** > **Your Project** > **Settings** > **Environment variables**.
-    - Ensure `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are set for **Production** and **Preview** environments.
+    - Ensure `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, and `VITE_CONVEX_URL` are set for **Production** and **Preview** environments.
     - *Note*: `wrangler.toml` vars are for Functions (server-side). Client-side vars (starting with `VITE_`) must be set in the dashboard for the build process.
 
 2.  **Check Build Command**:
