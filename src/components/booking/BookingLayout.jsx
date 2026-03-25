@@ -71,7 +71,7 @@ const BookingLayout = () => {
                     </div>
                     <h2 className="text-3xl font-serif font-bold text-primary mb-4">Booking Confirmed!</h2>
                     <p className="text-gray-600 max-w-md mx-auto mb-8">
-                        Thank you for booking with Queen of the Hills. A confirmation email has been sent to your inbox.
+                        Thank you for booking with Toils. A confirmation email has been sent to your inbox.
                     </p>
                     <button 
                         onClick={() => navigate('/')}

@@ -8,18 +8,20 @@ const Footer = () => {
     { name: 'Experiences', path: '/experiences' },
     { name: 'Packages', path: '/#packages' },
     { name: 'About Us', path: '/#about' },
-    { name: 'Contact', path: '/#contact' },
+    { name: 'Contact', path: '/contact' },
   ];
 
   return (
     <footer id="contact" className="bg-primary text-white pt-20 pb-10">
       <div className="container mx-auto px-4 md:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 mb-16">
           {/* Brand */}
           <div className="space-y-6">
-            <h2 className="font-serif text-3xl font-bold">Queen of the Hills</h2>
+            <h2 className="font-serif text-3xl font-bold">Toils</h2>
             <p className="text-gray-300 leading-relaxed max-w-sm">
-              Crafting premium travel experiences in Darjeeling since 2010. We believe in sustainable tourism that honors the local culture and environment.
+              Toils is a new company redefining how Darjeeling is experienced.
+              <br />
+              Through a platform built for personalization, transparency, and complete flexibility — every journey is shaped entirely by you.
             </p>
             <div className="flex space-x-4">
               <a href="#" className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-accent hover:border-accent transition-all duration-300">
@@ -53,40 +55,20 @@ const Footer = () => {
           <div>
             <h3 className="text-accent font-serif text-xl mb-6">Contact Us</h3>
             <ul className="space-y-6">
-              <li className="flex items-start">
-                <MapPin className="w-5 h-5 text-accent mr-4 mt-1 flex-shrink-0" />
-                <span className="text-gray-300">The Mall Road, Above Glenary's,<br />Darjeeling, West Bengal 734101</span>
-              </li>
               <li className="flex items-center">
                 <Phone className="w-5 h-5 text-accent mr-4 flex-shrink-0" />
-                <span className="text-gray-300">+91 98765 43210</span>
+                <a className="text-gray-300 hover:text-white transition-colors" href="tel:+918170848914">+91 8170848914</a>
               </li>
               <li className="flex items-center">
                 <Mail className="w-5 h-5 text-accent mr-4 flex-shrink-0" />
-                <span className="text-gray-300">hello@queenofthehills.com</span>
+                <a className="text-gray-300 hover:text-white transition-colors" href="mailto:toilsdarjeeling@gmail.com">toilsdarjeeling@gmail.com</a>
               </li>
             </ul>
-          </div>
-
-          {/* Newsletter */}
-          <div>
-            <h3 className="text-accent font-serif text-xl mb-6">Newsletter</h3>
-            <p className="text-gray-300 mb-6">Subscribe to receive seasonal offers and travel tales.</p>
-            <form className="space-y-4">
-              <input 
-                type="email" 
-                placeholder="Your email address" 
-                className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-accent transition-colors"
-              />
-              <button className="w-full bg-accent text-white font-medium py-3 rounded-lg hover:bg-accent/90 transition-colors">
-                Subscribe
-              </button>
-            </form>
           </div>
         </div>
 
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-400">
-          <p>&copy; 2024 Queen of the Hills. All rights reserved.</p>
+          <p>&copy; 2024 Toils. All rights reserved.</p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
             <a href="#" className="hover:text-white transition-colors">Terms of Service</a>

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const Hero = () => {
   return (
-    <section className="relative h-screen w-full overflow-hidden flex items-center justify-center pt-20">
+    <section className="relative h-screen w-full overflow-hidden flex items-start justify-center pt-20">
       {/* Abstract Landscape Background */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         {/* Sky Gradient */}
@@ -38,16 +38,16 @@ const Hero = () => {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 w-full max-w-4xl px-4 text-center">
-        <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif text-primary mb-6 animate-fade-in-up">
-          Find your peace in <span className="text-accent italic">Darjeeling</span>
+      <div className="relative z-10 w-full max-w-4xl px-4 text-center mt-10 h-full">
+        <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif text-primary mb-6 animate-fade-in-up">
+          Build your own <span className="text-orange-500">Journey</span>
+          <span className="block mt-6 text-lg md:text-2xl lg:text-3xl font-normal text-gray-700">
+            With Toils - Your favorite travel partner
+          </span>
         </h1>
-        <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto animate-fade-in-up delay-100">
-          Discover the Queen of the Hills through curated heritage experiences and breathtaking landscapes.
-        </p>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row justify-center gap-4 animate-fade-in-up delay-200">
+        <div className="flex flex-col sm:flex-row justify-center gap-4 animate-fade-in-up delay-200 absolute left-0 right-0 bottom-[calc(28vh+200px)] px-4 sm:static sm:px-0 sm:bottom-auto">
           <Link to="/sight-seeing" className="bg-primary text-white px-8 py-3 rounded-full text-lg font-medium hover:bg-opacity-90 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 inline-block">
             Sight Seeing
           </Link>

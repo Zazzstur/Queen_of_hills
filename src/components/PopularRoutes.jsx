@@ -20,9 +20,12 @@ const PopularRoutes = () => {
   useEffect(() => {
     const fetchRoutes = async () => {
       try {
-        const { data, error } = await routeService.getRoutes();
+        const { data, error } = await routeService.getTopBookedRoutes({
+          limit: 10,
+          routeType: 'sightseeing',
+        });
         if (!error && data) {
-          setRoutes(data);
+          setRoutes(data.slice(0, 10));
         }
       } catch (err) {
         console.error("Failed to fetch routes for ticker", err);
@@ -94,6 +97,12 @@ const PopularRoutes = () => {
                         </>
                     )}
                 </h3>
+
+                {route.name && route.origin && route.destination && (
+                  <div className="text-xs text-gray-500 mb-2">
+                    {route.origin} <span className="mx-1">→</span> {route.destination}
+                  </div>
+                )}
                 
                 <p className="text-sm text-gray-500 line-clamp-2 mb-4">
                     {route.description || `Enjoy a scenic journey from ${route.origin} to ${route.destination}.`}

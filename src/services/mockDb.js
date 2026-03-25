@@ -511,6 +511,25 @@ export const mockDb = {
     return { data: hydrated, error: null };
   },
 
+  async setDestinationStop(routeId, stopId) {
+    await delay(200);
+    const db = getDb();
+    const targetRouteId = String(routeId);
+    const targetStopId = stopId ? String(stopId) : null;
+
+    db.stops = (db.stops || []).map((s) => {
+      if (String(s.routeId) !== targetRouteId) return s;
+      const isDestination = targetStopId ? String(s.id) === targetStopId : false;
+      return { ...s, isDestination, updated_at: new Date().toISOString() };
+    });
+
+    saveDb(db);
+
+    const stops = (db.stops || []).filter((s) => String(s.routeId) === targetRouteId);
+    const hydrated = await rehydrateImages(stops);
+    return { data: hydrated, error: null };
+  },
+
   async deleteStop(id) {
     await delay(300);
     const db = getDb();

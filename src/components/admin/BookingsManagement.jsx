@@ -4,9 +4,27 @@ import { Trash2 } from 'lucide-react';
 
 const formatDateTime = (iso) => {
   try {
-    return new Date(iso).toLocaleString();
+    const date = new Date(iso);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return `${day}/${month}/${year}, ${time}`;
   } catch {
     return iso;
+  }
+};
+
+const formatDateOnly = (dateString) => {
+  if (!dateString) return '';
+  try {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  } catch {
+    return dateString;
   }
 };
 
@@ -106,12 +124,26 @@ const BookingsManagement = () => {
                     <td className="px-6 py-4 text-sm text-gray-700">{b.contact?.name}</td>
                     <td className="px-6 py-4 text-sm text-gray-700">{b.contact?.email || '-'}</td>
                     <td className="px-6 py-4 text-sm text-gray-700">{b.contact?.phone}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{b.contact?.pickupLocation}</td>
                     <td className="px-6 py-4 text-sm text-gray-700">
-                      {b.service?.title ||
-                        (b.service?.origin && b.service?.destination
-                          ? `${b.service.origin} to ${b.service.destination}`
-                          : b.service?.type)}
+                      <div>{b.contact?.pickupLocation}</div>
+                      {(b.booking?.startDate || b.booking?.timeSlot) && (
+                        <div className="text-xs text-gray-500 mt-1">
+                          {formatDateOnly(b.booking?.startDate)} {b.booking?.timeSlot}
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-700">
+                      <div>
+                        {b.service?.title ||
+                          (b.service?.origin && b.service?.destination
+                            ? `${b.service.origin} to ${b.service.destination}`
+                            : b.service?.type)}
+                      </div>
+                      {Array.isArray(b.booking?.stopNames) && b.booking.stopNames.length > 0 && (
+                        <div className="text-xs text-gray-500 mt-1">
+                          {b.booking.stopNames.join(', ')}
+                        </div>
+                      )}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-700">
                       ₹{Number(b.pricing?.total || 0).toFixed(0)}
@@ -148,4 +180,3 @@ const BookingsManagement = () => {
 };
 
 export default BookingsManagement;
-

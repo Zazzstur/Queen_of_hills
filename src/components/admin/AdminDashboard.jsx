@@ -3,30 +3,20 @@ import { useAdmin } from '../../context/AdminContext';
 import { routeService } from '../../services/routeService';
 import AdminLogin from './AdminLogin';
 import ServiceTable from './ServiceTable';
-import ServiceModal from './ServiceModal';
-import AddStayForm from './AddStayForm';
 import AddRouteForm from './AddRouteForm';
 import DeleteConfirmation from './DeleteConfirmation';
 import BookingsManagement from './BookingsManagement';
-import { LayoutDashboard, Home, LogOut, Route as RouteIcon, Car, ClipboardList } from 'lucide-react';
+import ContactMessagesManagement from './ContactMessagesManagement';
+import { LayoutDashboard, LogOut, Route as RouteIcon, Car, ClipboardList, Mail } from 'lucide-react';
 
 const TABS = [
-  { id: 'stays', label: 'Homestays', icon: Home },
   { id: 'routes', label: 'Sight Seeing', icon: RouteIcon },
   { id: 'direct', label: 'Direct Travel', icon: Car },
   { id: 'bookings', label: 'Bookings', icon: ClipboardList },
+  { id: 'contact', label: 'Contact', icon: Mail },
 ];
 
 const FIELD_CONFIG = {
-  stays: [
-    { key: 'title', label: 'Name', required: true },
-    { key: 'type', label: 'Type', type: 'select', options: ['Heritage Stay', 'Homestay', 'Hotel', 'Resort'] },
-    { key: 'price', label: 'Price', required: true, hiddenInTable: true },
-    { key: 'capacity', label: 'Capacity', hiddenInTable: true },
-    { key: 'image', label: 'Image URL', type: 'text', hiddenInTable: true },
-    { key: 'description', label: 'Description', type: 'textarea' },
-    { key: 'tags', label: 'Tags (comma separated)', hiddenInTable: true },
-  ],
   routes: [
     { key: 'name', label: 'Route Name', required: true },
     { key: 'origin', label: 'Origin', required: true },
@@ -63,8 +53,8 @@ const FIELD_CONFIG = {
 };
 
 const AdminDashboard = () => {
-  const { isAuthenticated, logout, data, addItem, updateItem, deleteItem, refreshData } = useAdmin();
-  const [activeTab, setActiveTab] = useState('stays');
+  const { isAuthenticated, logout } = useAdmin();
+  const [activeTab, setActiveTab] = useState('routes');
   
   // Local state for routes fetched from Supabase
   const [routes, setRoutes] = useState([]);
@@ -72,8 +62,6 @@ const AdminDashboard = () => {
   const [routeError, setRouteError] = useState(null);
   
   // Modal States
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isAddingStay, setIsAddingStay] = useState(false);
   const [isAddingRoute, setIsAddingRoute] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   
@@ -109,15 +97,9 @@ const AdminDashboard = () => {
   }
 
   const handleAdd = () => {
-    if (activeTab === 'stays') {
-        setEditingItem(null);
-        setIsAddingStay(true);
-    } else if (activeTab === 'routes' || activeTab === 'direct') {
+    if (activeTab === 'routes' || activeTab === 'direct') {
         setEditingItem(null);
         setIsAddingRoute(true);
-    } else {
-        setEditingItem(null);
-        setIsModalOpen(true);
     }
   };
 
@@ -129,18 +111,15 @@ const AdminDashboard = () => {
     }
     setEditingItem(processedItem);
     
-    if (activeTab === 'stays') {
-        setIsAddingStay(true);
-    } else if (activeTab === 'routes' || activeTab === 'direct') {
+    if (activeTab === 'routes' || activeTab === 'direct') {
         setIsAddingRoute(true);
-    } else {
-        setIsModalOpen(true);
     }
   };
 
   const handleDeleteClick = (id) => {
+    if (activeTab !== 'routes' && activeTab !== 'direct') return;
     // Determine the item source based on active tab
-    const list = (activeTab === 'routes' || activeTab === 'direct') ? routes : data[activeTab];
+    const list = routes;
     const item = list.find(i => i.id === id);
     
     if (item) {
@@ -151,36 +130,16 @@ const AdminDashboard = () => {
 
   const handleConfirmDelete = async () => {
     if (deleteId) {
-        if (activeTab === 'routes' || activeTab === 'direct') {
-            try {
-                const { error } = await routeService.deleteRoute(deleteId);
-                if (error) throw error;
-                // Refresh routes locally
-                setRoutes(prev => prev.filter(r => r.id !== deleteId));
-            } catch (err) {
-                console.error("Failed to delete route:", err);
-                alert("Failed to delete route. Please try again.");
-            }
-        } else {
-            deleteItem(activeTab, deleteId);
+        try {
+            const { error } = await routeService.deleteRoute(deleteId);
+            if (error) throw error;
+            setRoutes(prev => prev.filter(r => r.id !== deleteId));
+        } catch (err) {
+            console.error("Failed to delete route:", err);
+            alert("Failed to delete route. Please try again.");
         }
         setDeleteId(null);
     }
-  };
-
-  const handleFormSubmit = (formData) => {
-    // Process tags string back to array
-    const processedData = { ...formData };
-    if (typeof processedData.tags === 'string') {
-        processedData.tags = processedData.tags.split(',').map(t => t.trim()).filter(Boolean);
-    }
-
-    if (editingItem) {
-        updateItem(activeTab, editingItem.id, processedData);
-    } else {
-        addItem(activeTab, processedData);
-    }
-    setIsModalOpen(false);
   };
 
   const ActiveIcon = TABS.find(t => t.id === activeTab)?.icon || LayoutDashboard;
@@ -191,7 +150,7 @@ const AdminDashboard = () => {
         if (activeTab === 'direct') return r.type === 'direct';
         return !r.type || r.type === 'sightseeing';
     })
-    : data[activeTab];
+    : [];
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
@@ -248,20 +207,7 @@ const AdminDashboard = () => {
             </div>
         </header>
 
-        {isAddingStay ? (
-          <AddStayForm 
-            initialData={editingItem}
-            onComplete={() => {
-              setIsAddingStay(false);
-              setEditingItem(null);
-              refreshData();
-            }}
-            onCancel={() => {
-                setIsAddingStay(false);
-                setEditingItem(null);
-            }}
-          />
-        ) : isAddingRoute ? (
+        {isAddingRoute ? (
           <AddRouteForm 
             initialData={editingItem}
             defaultType={activeTab === 'direct' ? 'direct' : 'sightseeing'}
@@ -277,6 +223,8 @@ const AdminDashboard = () => {
           />
         ) : activeTab === 'bookings' ? (
           <BookingsManagement />
+        ) : activeTab === 'contact' ? (
+          <ContactMessagesManagement />
         ) : (
           <>
             {(activeTab === 'routes' || activeTab === 'direct') && routeError && (
@@ -297,15 +245,6 @@ const AdminDashboard = () => {
                     onDelete={handleDeleteClick}
                 />
             )}
-
-            <ServiceModal
-              isOpen={isModalOpen}
-              onClose={() => setIsModalOpen(false)}
-              onSubmit={handleFormSubmit}
-              initialData={editingItem}
-              title={TABS.find(t => t.id === activeTab)?.label.slice(0, -1)} // Singularize roughly
-              fields={FIELD_CONFIG[activeTab]}
-            />
 
             <DeleteConfirmation
               isOpen={!!deleteId}

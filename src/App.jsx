@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import Services from './components/Services';
@@ -8,6 +8,7 @@ import PopularRoutes from './components/PopularRoutes';
 import Footer from './components/Footer';
 import ExperiencesListing from './components/ExperiencesListing';
 import AdminDashboard from './components/admin/AdminDashboard';
+import ContactPage from './components/ContactPage';
 import { AdminProvider } from './context/AdminContext';
 import { BookingProvider } from './context/BookingContext';
 import BookingLayout from './components/booking/BookingLayout';
@@ -19,7 +20,7 @@ import RouteDetails from './components/RouteDetails';
 const Layout = ({ children }) => {
   const location = useLocation();
   // Header is transparent on pages with CompactHero (dark background)
-  const isTransparent = ['/hotels-and-stays', '/sight-seeing', '/direct-travel', '/experiences'].includes(location.pathname);
+  const isTransparent = ['/sight-seeing', '/direct-travel', '/experiences'].includes(location.pathname);
 
   return (
     <>
@@ -50,9 +51,10 @@ function App() {
 
               {/* Public Routes with Header/Footer */}
               <Route path="/" element={<Layout><HomePage /></Layout>} />
-              <Route path="/hotels-and-stays" element={<Layout><ExperiencesListing /></Layout>} />
+              <Route path="/hotels-and-stays" element={<Navigate to="/" replace />} />
               <Route path="/sight-seeing" element={<Layout><ExperiencesListing initialCategory="routes" /></Layout>} />
               <Route path="/direct-travel" element={<Layout><ExperiencesListing initialCategory="direct" /></Layout>} />
+              <Route path="/contact" element={<Layout><ContactPage /></Layout>} />
               <Route path="/stay/:id" element={<Layout><StayDetails /></Layout>} />
               <Route path="/route/:id" element={<Layout><RouteDetails /></Layout>} />
               

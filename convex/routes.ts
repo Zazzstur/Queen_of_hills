@@ -16,7 +16,69 @@ export const getRoutes = query({
   args: {},
   handler: async (ctx) => {
     const routes = await ctx.db.query("routes").order("desc").collect();
-    return routes.map(toClientDoc);
+    const bookings = await ctx.db.query("bookings").collect();
+    const counts: Record<string, number> = {};
+    for (const b of bookings) {
+      if (b.status === "cancelled") continue;
+      if (b.service?.type !== "route") continue;
+      const serviceId = b.service?.id;
+      if (!serviceId) continue;
+      counts[serviceId] = (counts[serviceId] ?? 0) + 1;
+    }
+    return routes.map((r) => {
+      const base = toClientDoc(r);
+      return { ...base, bookingCount: counts[String(r._id)] ?? 0 };
+    });
+  },
+});
+
+export const getTopBookedRoutes = query({
+  args: {
+    limit: v.optional(v.number()),
+    routeType: v.optional(v.union(v.literal("direct"), v.literal("sightseeing"))),
+  },
+  handler: async (ctx, args) => {
+    const limit = args.limit ?? 10;
+    const bookings = await ctx.db.query("bookings").collect();
+
+    const counts = new Map<string, number>();
+    for (const b of bookings) {
+      if ((b as any).status === "cancelled") continue;
+      const service = (b as any).service;
+      if (!service || service.type !== "route") continue;
+      const routeId = service.id;
+      if (!routeId) continue;
+      counts.set(routeId, (counts.get(routeId) ?? 0) + 1);
+    }
+
+    const sortedRouteIds = [...counts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map(([id]) => id);
+
+    const results: any[] = [];
+
+    if (sortedRouteIds.length === 0) {
+      const routes = await ctx.db.query("routes").order("desc").collect();
+      for (const r of routes) {
+        if (args.routeType && (r as any).type !== args.routeType) continue;
+        results.push({ ...toClientDoc(r), bookingsCount: 0 });
+        if (results.length >= limit) break;
+      }
+      return results;
+    }
+
+    for (const routeId of sortedRouteIds) {
+      const route = await ctx.db.get(routeId as any);
+      if (!route) continue;
+      if (args.routeType && (route as any).type !== args.routeType) continue;
+      results.push({
+        ...toClientDoc(route),
+        bookingsCount: counts.get(routeId) ?? 0,
+      });
+      if (results.length >= limit) break;
+    }
+
+    return results;
   },
 });
 
@@ -125,6 +187,7 @@ export const addStop = mutation({
     price6SeaterLuxurySuv: v.optional(v.number()),
     price6to10SeaterSuv: v.optional(v.number()),
     description: v.optional(v.string()),
+    isDestination: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const route = await ctx.db.get(args.routeId);
@@ -140,6 +203,7 @@ export const addStop = mutation({
       price6SeaterLuxurySuv: args.price6SeaterLuxurySuv ?? 0,
       price6to10SeaterSuv: args.price6to10SeaterSuv ?? 0,
       description: args.description,
+      isDestination: args.isDestination,
     });
     const doc = await ctx.db.get(id);
     if (!doc) return null;
@@ -156,6 +220,7 @@ export const updateStop = mutation({
     price6SeaterLuxurySuv: v.optional(v.number()),
     price6to10SeaterSuv: v.optional(v.number()),
     description: v.optional(v.string()),
+    isDestination: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const { id, ...maybe } = args;
@@ -167,6 +232,30 @@ export const updateStop = mutation({
     const doc = await ctx.db.get(id);
     if (!doc) return null;
     return toClientDoc(doc);
+  },
+});
+
+export const setDestinationStop = mutation({
+  args: {
+    routeId: v.id("routes"),
+    stopId: v.optional(v.id("stops")),
+  },
+  handler: async (ctx, args) => {
+    if (args.stopId) {
+      const stop = await ctx.db.get(args.stopId);
+      if (!stop) throw new Error("Stop not found");
+      if ((stop as any).route_id !== args.routeId) throw new Error("Stop does not belong to route");
+    }
+
+    const stops = await ctx.db
+      .query("stops")
+      .withIndex("by_route_id", (q) => q.eq("route_id", args.routeId))
+      .collect();
+
+    for (const s of stops) {
+      await ctx.db.patch(s._id, { isDestination: args.stopId ? s._id === args.stopId : false });
+    }
+    return null;
   },
 });
 

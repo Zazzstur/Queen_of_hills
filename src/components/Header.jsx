@@ -23,10 +23,9 @@ const Header = ({ isTransparent = false }) => {
 
   const navLinks = [
     { name: 'Home', path: '/' },
-    { name: 'Hotels & Stays', path: '/hotels-and-stays' },
     { name: 'Sight Seeing', path: '/sight-seeing' },
     { name: 'Direct Travel', path: '/direct-travel' },
-    { name: 'Contact', path: '/#contact' },
+    { name: 'Contact', path: '/contact' },
   ];
 
   return (
@@ -46,7 +45,7 @@ const Header = ({ isTransparent = false }) => {
             isTransparent && !isScrolled && !isMenuOpen ? "text-white" : "text-[#064E3B]"
           )}
         >
-          Queen of the Hills
+          Toils
         </Link>
 
         {/* Desktop Navigation */}

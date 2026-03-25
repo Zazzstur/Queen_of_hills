@@ -52,6 +52,25 @@ export const routeService = {
     );
   },
 
+  async getTopBookedRoutes({ limit = 10, routeType } = {}) {
+    if (effectiveUseLocalDb) {
+      const { data, error } = await mockDb.getRoutes();
+      if (error) return { data: null, error };
+      const filtered = routeType ? (data || []).filter((r) => r.type === routeType) : (data || []);
+      return { data: filtered.slice(0, limit), error: null };
+    }
+    return executeWithRetry(
+      async () => ({
+        data: await getConvex().query(api.routes.getTopBookedRoutes, {
+          limit,
+          routeType,
+        }),
+        error: null,
+      }),
+      'Get Top Booked Routes'
+    );
+  },
+
   async updateRoute(id, updates) {
     if (effectiveUseLocalDb) {
       return mockDb.updateRoute(id, updates);
@@ -185,6 +204,20 @@ export const routeService = {
         error: null,
       }),
       `Delete Stop ${id}`
+    );
+  },
+
+  async setDestinationStop(routeId, stopId) {
+    if (effectiveUseLocalDb) {
+      return mockDb.setDestinationStop(routeId, stopId);
+    }
+    const args = stopId ? { routeId, stopId } : { routeId };
+    return executeWithRetry(
+      async () => ({
+        data: await getConvex().mutation(api.routes.setDestinationStop, args),
+        error: null,
+      }),
+      "Set Destination Stop"
     );
   },
 

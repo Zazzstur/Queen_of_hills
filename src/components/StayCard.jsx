@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Bed, Star, Clock, Users, ArrowRight } from 'lucide-react';
+import { Bed, Clock, Users, ArrowRight } from 'lucide-react';
 import { stayService } from '../services/stayService';
 
 const StayCard = ({ stay, onNavigate }) => {
@@ -51,12 +51,8 @@ const StayCard = ({ stay, onNavigate }) => {
       {/* Info Area */}
       <div className="p-6 flex-1 flex flex-col justify-between">
         <div>
-          <div className="flex justify-between items-start mb-2">
+          <div className="flex items-start mb-2">
             <span className="text-xs font-semibold tracking-wider text-accent uppercase">{stay.type}</span>
-            <div className="flex items-center text-gray-400">
-               <Star className="w-3 h-3 fill-current text-accent mr-1" />
-               <span className="text-xs text-gray-600">4.8</span>
-            </div>
           </div>
           
           <h3 className="font-serif text-xl font-bold text-primary mb-2 group-hover:text-accent transition-colors">

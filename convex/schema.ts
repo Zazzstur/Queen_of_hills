@@ -68,6 +68,7 @@ export default defineSchema({
     price6SeaterLuxurySuv: v.optional(v.number()),
     price6to10SeaterSuv: v.optional(v.number()),
     description: v.optional(v.string()),
+    isDestination: v.optional(v.boolean()),
   })
     .index("by_sId", ["sId"])
     .index("by_route_id", ["route_id"]),
@@ -114,6 +115,17 @@ export default defineSchema({
       taxes: v.number(),
       total: v.number(),
     }),
+  })
+    .index("by_status", ["status"])
+    .index("by_created_at", ["created_at"]),
+
+  contact_messages: defineTable({
+    created_at: v.string(),
+    status: v.union(v.literal("new"), v.literal("resolved")),
+    name: v.string(),
+    phone: v.string(),
+    email: v.string(),
+    message: v.string(),
   })
     .index("by_status", ["status"])
     .index("by_created_at", ["created_at"]),

@@ -135,6 +135,19 @@ const AddRouteForm = ({ onCancel, onComplete, initialData, defaultType = 'sights
       }
   };
 
+  const handleToggleDestination = async (stop) => {
+      const nextStopId = stop.isDestination ? undefined : stop.id;
+      setStops(prev => prev.map(s => (s.id === stop.id ? { ...s, isDestination: !stop.isDestination } : { ...s, isDestination: false })));
+      try {
+          await routeService.setDestinationStop(createdRoute.id, nextStopId);
+          await fetchStops(createdRoute.id);
+          showNotification('success', nextStopId ? 'Destination updated' : 'Destination cleared');
+      } catch (err) {
+          await fetchStops(createdRoute.id);
+          showNotification('error', 'Failed to update destination');
+      }
+  };
+
   const handleSaveStop = async (e) => {
       e.preventDefault();
       setLoading(true);
@@ -381,6 +394,11 @@ const AddRouteForm = ({ onCancel, onComplete, initialData, defaultType = 'sights
                                             <div>
                                                 <div className="flex items-center gap-3 mb-1">
                                                     <h4 className="font-bold text-lg text-gray-800">{stop.name}</h4>
+                                                    {stop.isDestination && (
+                                                        <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-medium border border-blue-100">
+                                                            Destination
+                                                        </span>
+                                                    )}
                                                     {((Number(stop.price4Seater) || 0) + (Number(stop.price6SeaterLuxurySuv) || 0) + (Number(stop.price6to10SeaterSuv) || 0)) > 0 ? (
                                                         <span className="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full font-medium border border-green-100">
                                                             ₹{Number(stop.price4Seater) || 0} / ₹{Number(stop.price6SeaterLuxurySuv) || 0} / ₹{Number(stop.price6to10SeaterSuv) || 0}
@@ -395,6 +413,14 @@ const AddRouteForm = ({ onCancel, onComplete, initialData, defaultType = 'sights
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => handleToggleDestination(stop)}
+                                                className={`p-2 rounded-md ${stop.isDestination ? 'text-blue-700 bg-blue-50' : 'text-gray-500 hover:bg-gray-50'}`}
+                                                title={stop.isDestination ? 'Clear destination' : 'Mark as destination'}
+                                            >
+                                                <MapPin className="w-4 h-4" />
+                                            </button>
                                             <button
                                                 type="button"
                                                 onClick={() => handleEditStop(stop)}
