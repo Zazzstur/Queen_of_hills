@@ -5,9 +5,8 @@ import { Link } from 'react-router-dom';
 const Footer = () => {
   const quickLinks = [
     { name: 'Home', path: '/' },
-    { name: 'Experiences', path: '/experiences' },
-    { name: 'Packages', path: '/#packages' },
-    { name: 'About Us', path: '/#about' },
+    { name: 'Sight Seeing', path: '/sight-seeing' },
+    { name: 'Direct Travel', path: '/direct-travel' },
     { name: 'Contact', path: '/contact' },
   ];
 

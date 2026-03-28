@@ -201,13 +201,15 @@ const DateSelection = () => {
         
         {bookingData.serviceDetails && (
             <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6">
-                <div className="aspect-video rounded-lg overflow-hidden bg-gray-200 mb-3">
-                     <img 
-                        src={bookingData.serviceDetails.thumbnail_url || bookingData.serviceDetails.image || 'https://via.placeholder.com/300'} 
-                        alt="Service" 
-                        className="w-full h-full object-cover"
-                    />
-                </div>
+                {(bookingData.serviceDetails.thumbnail_url || bookingData.serviceDetails.image || bookingData.serviceDetails.coverImage) && (
+                    <div className="aspect-video rounded-lg overflow-hidden bg-gray-200 mb-3">
+                        <img 
+                            src={bookingData.serviceDetails.thumbnail_url || bookingData.serviceDetails.image || bookingData.serviceDetails.coverImage} 
+                            alt="Service" 
+                            className="w-full h-full object-cover"
+                        />
+                    </div>
+                )}
                 <h4 className="font-bold text-primary mb-1">
                     {bookingData.serviceDetails.title || bookingData.serviceDetails.origin + ' to ' + bookingData.serviceDetails.destination}
                 </h4>

@@ -103,7 +103,7 @@ const CheckoutPage = () => {
                     <input 
                         type="text" 
                         className="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-primary"
-                        placeholder="John Doe"
+                        placeholder="Name"
                         value={bookingData.contactDetails.name}
                         onChange={(e) => updateContact('name', e.target.value)}
                         required
@@ -114,7 +114,7 @@ const CheckoutPage = () => {
                     <input 
                         type="email" 
                         className="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-primary"
-                        placeholder="john@example.com"
+                        placeholder="*********@gmail.com"
                         value={bookingData.contactDetails.email}
                         onChange={(e) => updateContact('email', e.target.value)}
                     />
@@ -124,7 +124,7 @@ const CheckoutPage = () => {
                     <input 
                         type="tel" 
                         className="w-full border border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-primary"
-                        placeholder="+91 98765 43210"
+                        placeholder="+91 **********"
                         value={bookingData.contactDetails.phone}
                         onChange={(e) => updateContact('phone', e.target.value)}
                         required
@@ -163,13 +163,15 @@ const CheckoutPage = () => {
         
         {/* Item Card */}
         <div className="flex gap-4 mb-6">
-            <div className="w-20 h-20 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
-                 <img 
-                    src={bookingData.serviceDetails.thumbnail_url || bookingData.serviceDetails.image || 'https://via.placeholder.com/150'} 
-                    alt="Service" 
-                    className="w-full h-full object-cover"
-                />
-            </div>
+            {(bookingData.serviceDetails.thumbnail_url || bookingData.serviceDetails.image || bookingData.serviceDetails.coverImage) && (
+                <div className="w-20 h-20 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                    <img 
+                        src={bookingData.serviceDetails.thumbnail_url || bookingData.serviceDetails.image || bookingData.serviceDetails.coverImage} 
+                        alt="Service" 
+                        className="w-full h-full object-cover"
+                    />
+                </div>
+            )}
             <div>
                 <h4 className="font-bold text-gray-800 line-clamp-2">
                      {bookingData.serviceDetails.title || bookingData.serviceDetails.origin + ' to ' + bookingData.serviceDetails.destination}

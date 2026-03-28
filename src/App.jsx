@@ -12,6 +12,7 @@ import ContactPage from './components/ContactPage';
 import { AdminProvider } from './context/AdminContext';
 import { BookingProvider } from './context/BookingContext';
 import BookingLayout from './components/booking/BookingLayout';
+import ScrollToTop from './components/ScrollToTop';
 
 import StayDetails from './components/StayDetails';
 import RouteDetails from './components/RouteDetails';
@@ -44,6 +45,7 @@ function App() {
     <AdminProvider>
       <BookingProvider>
         <Router>
+          <ScrollToTop />
           <div className="min-h-screen w-full overflow-x-hidden bg-snow">
             <Routes>
               {/* Admin Route - No Header/Footer */}

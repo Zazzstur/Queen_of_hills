@@ -245,67 +245,59 @@ const TicketCard = ({ item, category, onNavigate }) => {
 
   return (
     <>
-      <div className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col md:flex-row h-full">
-      {/* Visual Area (Left/Top) */}
       <div 
-        className="w-full md:w-1/3 aspect-[3/2] relative flex items-center justify-center overflow-hidden"
-        style={{ background: style.background }}
+        onClick={() => handleViewDetails()}
+        className="group bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all cursor-pointer flex flex-col h-full"
       >
-        {item.image ? (
-            <img src={item.image} alt={item.title} className="absolute inset-0 w-full h-full object-cover" />
-        ) : (
-            <div className={clsx("w-12 h-12 rounded-full flex items-center justify-center shadow-lg z-10", style.iconBg)}>
-            <Icon className={clsx("w-6 h-6", style.iconColor)} />
-            </div>
-        )}
-        
-        {/* Decorative Elements */}
-        {!item.image && (
-            <>
-                <div className="absolute inset-0 bg-black/5" />
-                <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
-            </>
-        )}
-      </div>
+        {/* Visual Area */}
+        <div className="w-full relative overflow-hidden bg-gray-100 aspect-[3/2]">
+          {item.image ? (
+              <img src={item.image} alt={item.title} className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" />
+          ) : (
+              <div className={clsx("w-full h-full flex items-center justify-center shadow-lg z-10", style.iconBg)}>
+                  <Icon className={clsx("w-12 h-12", style.iconColor)} />
+              </div>
+          )}
+          
+          <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-primary shadow-sm">
+             {item.price}
+          </div>
+        </div>
 
-      {/* Info Area (Right/Bottom) */}
-      <div className="p-6 flex-1 flex flex-col justify-between">
-        <div>
-          <div className="flex items-start mb-2">
-            <span className="text-xs font-semibold tracking-wider text-accent uppercase">{item.type}</span>
+        {/* Info Area */}
+        <div className="p-6 flex-1 flex flex-col">
+          <div className="flex justify-between items-start mb-2">
+            <span className="text-xs font-bold text-accent uppercase tracking-wider">{item.type}</span>
           </div>
           
-          <h3 className="font-serif text-xl font-bold text-primary mb-2 group-hover:text-accent transition-colors">
+          <h3 className="font-serif text-xl font-bold text-gray-800 mb-2 group-hover:text-primary transition-colors">
             {item.title}
           </h3>
 
-          {(category === 'routes' || category === 'direct') && item.origin && item.destination && (
+          {(category === 'routes' || category === 'direct') && item.origin && item.destination && item.title !== `${item.origin} to ${item.destination}` && (
             <div className="text-xs text-gray-500 mb-2">
               {item.origin} <span className="mx-1">→</span> {item.destination}
             </div>
           )}
           
-          <p className="text-gray-500 text-sm mb-4 whitespace-pre-line line-clamp-3 md:line-clamp-4">
+          <p className="text-sm text-gray-500 whitespace-pre-line line-clamp-3 md:line-clamp-4 mb-4 flex-1">
             {item.description}
           </p>
-        </div>
 
-        <div className="flex items-end justify-end mt-4 pt-4 border-t border-gray-100">
-          <div className="text-right">
-            <div className="text-lg font-bold text-primary">{item.price}</div>
+          <div className="flex items-center justify-end pt-4 border-t border-gray-50 mt-auto">
             <button
+                type="button"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                   handleBookNow();
                 }}
-                className="text-xs font-semibold text-accent flex items-center hover:underline mt-1 group/btn"
+                className="flex items-center gap-1 text-sm text-primary font-bold group-hover:gap-2 transition-all"
             >
-              Book Now <ArrowRight className="w-3 h-3 ml-1 transform group-hover/btn:translate-x-1 transition-transform" />
+              Book Now <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </div>
-      </div>
       </div>
 
       <CarTypeModal
@@ -452,7 +444,7 @@ const ExperiencesListing = ({ initialCategory = 'routes', onNavigate }) => {
       <FilterStrip activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
 
       <main className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-6 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {(activeCategory === 'routes' || activeCategory === 'direct') && loadingRoutes ? (
               <div className="col-span-full text-center py-12 text-gray-500">Loading routes...</div>
           ) : (
@@ -463,7 +455,7 @@ const ExperiencesListing = ({ initialCategory = 'routes', onNavigate }) => {
                   category={activeCategory} 
                   onNavigate={(page, id) => {
                       if (page === 'route-details') navigate(`/route/${id}`);
-                      else if (page === 'experiences') navigate('/experiences'); // Fallback
+                      else if (page === 'experiences') navigate('/sight-seeing'); // Fallback
                   }} 
               />
             ))

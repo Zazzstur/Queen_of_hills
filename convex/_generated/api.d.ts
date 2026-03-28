@@ -14,6 +14,7 @@ import type * as files from "../files.js";
 import type * as migrations from "../migrations.js";
 import type * as routes from "../routes.js";
 import type * as stays from "../stays.js";
+import type * as telegram from "../telegram.js";
 
 import type {
   ApiFromModules,
@@ -28,6 +29,7 @@ declare const fullApi: ApiFromModules<{
   migrations: typeof migrations;
   routes: typeof routes;
   stays: typeof stays;
+  telegram: typeof telegram;
 }>;
 
 /**

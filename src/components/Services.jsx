@@ -25,7 +25,7 @@ const Services = () => {
   const navigate = useNavigate();
 
   const handleNavigate = (category) => {
-    navigate('/experiences');
+    navigate('/sight-seeing');
   };
 
   const services = [

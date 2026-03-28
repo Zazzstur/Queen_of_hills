@@ -64,7 +64,7 @@ const Packages = () => {
             <p className="text-gray-600">Designed for the discerning traveler seeking authenticity.</p>
           </div>
           <button 
-            onClick={() => navigate('/experiences')}
+            onClick={() => navigate('/sight-seeing')}
             className="hidden md:block text-primary font-medium hover:text-accent transition-colors underline-offset-4 hover:underline mt-4 md:mt-0"
           >
             View all packages
@@ -78,7 +78,7 @@ const Packages = () => {
         </div>
 
         <button 
-          onClick={() => navigate('/experiences')}
+          onClick={() => navigate('/sight-seeing')}
           className="md:hidden w-full mt-8 py-3 border border-primary text-primary rounded-lg font-medium hover:bg-primary hover:text-white transition-colors"
         >
           View all packages

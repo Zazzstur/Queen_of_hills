@@ -54,7 +54,6 @@ const CarTypeModal = ({ isOpen, onClose, route, selectedCapacity, onSelect, titl
                 </div>
                 <div className="text-right">
                   <div className="text-lg font-bold text-primary">₹{price}</div>
-                  <div className="text-xs text-gray-500">base price</div>
                 </div>
               </button>
             );

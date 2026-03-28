@@ -16,6 +16,11 @@ const BookingLayout = () => {
     }
   }, [bookingData, navigate]);
 
+  // Scroll to top when step changes
+  React.useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentStep]);
+
   if (!bookingData.serviceId) return null;
 
   const steps = [
