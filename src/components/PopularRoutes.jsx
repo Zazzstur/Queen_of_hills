@@ -67,7 +67,7 @@ const PopularRoutes = () => {
               className="flex-shrink-0 w-80 md:w-96 bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all cursor-pointer snap-center group"
             >
               {/* Image Area */}
-              <div className="h-48 relative overflow-hidden bg-gray-100">
+              <div className="w-full relative overflow-hidden bg-gray-100 aspect-[3/2]">
                  {route.coverImage ? (
                     <img 
                         src={route.coverImage} 
@@ -104,15 +104,11 @@ const PopularRoutes = () => {
                   </div>
                 )}
                 
-                <p className="text-sm text-gray-500 line-clamp-2 mb-4">
+                <p className="text-sm text-gray-500 whitespace-pre-line line-clamp-3 md:line-clamp-4 mb-4">
                     {route.description || `Enjoy a scenic journey from ${route.origin} to ${route.destination}.`}
                 </p>
 
-                <div className="flex items-center justify-between pt-4 border-t border-gray-50">
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                        <Users className="w-4 h-4" /> 
-                        <span>{route.capacity}</span>
-                    </div>
+                <div className="flex items-center justify-end pt-4 border-t border-gray-50">
                     <button
                         type="button"
                         onClick={(e) => {

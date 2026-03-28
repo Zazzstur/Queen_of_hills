@@ -32,7 +32,7 @@ const StopDisplayCard = ({ stop, routeCapacity, onAdd, isSelected }) => {
     <div className="w-full bg-white rounded-xl shadow-md overflow-hidden flex flex-col relative group transition-shadow hover:shadow-lg">
       
       {/* 1. Carousel Section (40% height approx via aspect ratio) */}
-      <div className="relative w-full aspect-[4/3] bg-gray-100">
+      <div className="relative w-full aspect-[3/2] bg-gray-100">
         {hasImages ? (
           <div 
             ref={carouselRef}
@@ -45,7 +45,7 @@ const StopDisplayCard = ({ stop, routeCapacity, onAdd, isSelected }) => {
                 <img 
                   src={img.url || img.preview} 
                   alt={`${stop.name} view ${idx + 1}`} 
-                  className="w-full h-full object-cover"
+                  className="w-full aspect-[3/2] object-cover"
                   loading="lazy"
                 />
               </div>
@@ -89,7 +89,7 @@ const StopDisplayCard = ({ stop, routeCapacity, onAdd, isSelected }) => {
         </div>
 
         {/* Description */}
-        <p className="text-sm text-gray-600 leading-relaxed line-clamp-3 mb-4">
+        <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line line-clamp-4 mb-4">
             {stop.description || "No description available for this stop."}
         </p>
 

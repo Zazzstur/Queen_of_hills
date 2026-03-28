@@ -336,19 +336,20 @@ const AddRouteForm = ({ onCancel, onComplete, initialData, defaultType = 'sights
                             <label className="block text-sm font-medium text-gray-700 mb-2">Images</label>
                             <div className="flex flex-wrap gap-3">
                                 {currentStop.images.map((img, idx) => (
-                                    <div key={idx} className="relative w-20 h-20 group">
-                                        <img src={img.preview} alt="Preview" className="w-full h-full object-cover rounded-lg border border-gray-200" />
+                                    <div key={idx} className="relative w-36 aspect-[3/2] group">
+                                        <img src={img.preview || img.url} alt="Preview" className="w-full h-full object-cover rounded-lg border border-gray-200" />
                                         <button
                                             type="button"
                                             onClick={() => removeStopImage(idx)}
                                             className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
                                         >
-                                            <X className="w-3 h-3" />
+                                            <X className="w-4 h-4" />
                                         </button>
                                     </div>
                                 ))}
-                                <label className="w-20 h-20 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-primary hover:bg-primary/5 transition-all">
-                                    <Plus className="w-6 h-6 text-gray-400" />
+                                <label className="w-36 aspect-[3/2] flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-primary hover:bg-gray-50 transition-colors">
+                                    <Upload className="w-6 h-6 text-gray-400 mb-2" />
+                                    <span className="text-sm text-gray-500">Add Photos</span>
                                     <input type="file" multiple accept="image/*" className="hidden" onChange={handleStopImagesSelect} />
                                 </label>
                             </div>

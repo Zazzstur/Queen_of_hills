@@ -218,7 +218,7 @@ const StopCard = ({ routeId, onSuccess, onCancel }) => {
             <label className="block text-sm font-medium text-gray-700">Images</label>
             <div className="flex flex-wrap gap-3">
                 {images.map((img, idx) => (
-                    <div key={idx} className="relative w-24 h-24 rounded-lg overflow-hidden border border-gray-200 group shadow-sm">
+                    <div key={idx} className="relative w-36 aspect-[3/2] rounded-lg overflow-hidden border border-gray-200 group shadow-sm">
                         <img src={img.preview} alt="Preview" className="w-full h-full object-cover" />
                         <button 
                             type="button"
@@ -230,7 +230,7 @@ const StopCard = ({ routeId, onSuccess, onCancel }) => {
                     </div>
                 ))}
 
-                <label className="w-24 h-24 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-primary hover:bg-primary/5 transition-all group">
+                <label className="w-36 aspect-[3/2] flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-primary hover:bg-primary/5 transition-all group">
                     <div className="bg-gray-100 p-2 rounded-full mb-1 group-hover:bg-white transition-colors">
                         <Plus className="w-5 h-5 text-gray-400 group-hover:text-primary" />
                     </div>

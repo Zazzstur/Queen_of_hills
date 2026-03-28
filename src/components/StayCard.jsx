@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Bed, Clock, Users, ArrowRight } from 'lucide-react';
+import { Bed, ArrowRight } from 'lucide-react';
 import { stayService } from '../services/stayService';
 
 const StayCard = ({ stay, onNavigate }) => {
@@ -28,7 +28,7 @@ const StayCard = ({ stay, onNavigate }) => {
     <div className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col md:flex-row h-full">
       {/* Visual Area */}
       <div 
-        className="h-40 md:h-auto md:w-1/3 relative flex items-center justify-center overflow-hidden"
+        className="w-full md:w-1/3 aspect-[3/2] relative flex items-center justify-center overflow-hidden"
         style={{ background: 'repeating-linear-gradient(90deg, #F3F4F6, #F3F4F6 10px, #E5E7EB 10px, #E5E7EB 20px)' }}
       >
         {stay.thumbnail_url || stay.image ? (
@@ -59,29 +59,12 @@ const StayCard = ({ stay, onNavigate }) => {
             {stay.title || stay.name}
           </h3>
           
-          <p className="text-gray-500 text-sm mb-4 line-clamp-2">
+          <p className="text-gray-500 text-sm mb-4 whitespace-pre-line line-clamp-3 md:line-clamp-4">
             {stay.description}
           </p>
-
-          <div className="flex flex-wrap gap-2 mb-4">
-            {(stay.amenities || stay.tags || []).map((tag, idx) => (
-              <span key={idx} className="px-2 py-1 bg-secondary rounded text-[10px] text-gray-600 font-medium">
-                {tag}
-              </span>
-            ))}
-          </div>
         </div>
 
-        <div className="flex items-end justify-between mt-4 pt-4 border-t border-gray-100">
-          <div className="space-y-1">
-             <div className="flex items-center text-xs text-gray-500">
-                <Clock className="w-3 h-3 mr-1" /> Per Night
-             </div>
-             <div className="flex items-center text-xs text-gray-500">
-                <Users className="w-3 h-3 mr-1" /> {stay.capacity || '2 Guests'}
-             </div>
-          </div>
-          
+        <div className="flex items-end justify-end mt-4 pt-4 border-t border-gray-100">
           <div className="text-right">
             <div className="text-lg font-bold text-primary">
                 {minPrice ? `₹${minPrice.toLocaleString()}` : (stay.price || 'On Request')}

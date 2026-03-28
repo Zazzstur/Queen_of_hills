@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { routeService } from '../services/routeService';
 import CarTypeModal from './CarTypeModal';
-import { Filter, Star, Clock, Users, ArrowRight, ChevronDown, Route, Car } from 'lucide-react';
+import { Filter, Star, ArrowRight, ChevronDown, Route, Car } from 'lucide-react';
 import clsx from 'clsx';
 
 // --- Components ---
@@ -248,7 +248,7 @@ const TicketCard = ({ item, category, onNavigate }) => {
       <div className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col md:flex-row h-full">
       {/* Visual Area (Left/Top) */}
       <div 
-        className="h-40 md:h-auto md:w-1/3 relative flex items-center justify-center overflow-hidden"
+        className="w-full md:w-1/3 aspect-[3/2] relative flex items-center justify-center overflow-hidden"
         style={{ background: style.background }}
       >
         {item.image ? (
@@ -285,29 +285,12 @@ const TicketCard = ({ item, category, onNavigate }) => {
             </div>
           )}
           
-          <p className="text-gray-500 text-sm mb-4 line-clamp-2">
+          <p className="text-gray-500 text-sm mb-4 whitespace-pre-line line-clamp-3 md:line-clamp-4">
             {item.description}
           </p>
-
-          <div className="flex flex-wrap gap-2 mb-4">
-            {item.tags.map(tag => (
-              <span key={tag} className="px-2 py-1 bg-secondary rounded text-[10px] text-gray-600 font-medium">
-                {tag}
-              </span>
-            ))}
-          </div>
         </div>
 
-        <div className="flex items-end justify-between mt-4 pt-4 border-t border-gray-100">
-          <div className="space-y-1">
-             <div className="flex items-center text-xs text-gray-500">
-                <Clock className="w-3 h-3 mr-1" /> {item.duration}
-             </div>
-             <div className="flex items-center text-xs text-gray-500">
-                <Users className="w-3 h-3 mr-1" /> {item.capacity}
-             </div>
-          </div>
-          
+        <div className="flex items-end justify-end mt-4 pt-4 border-t border-gray-100">
           <div className="text-right">
             <div className="text-lg font-bold text-primary">{item.price}</div>
             <button
