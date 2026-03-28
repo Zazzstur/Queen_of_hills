@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { internal } from "./_generated/api";
 
 function toClientDoc(doc: any) {
   const { _id, _creationTime, ...rest } = doc;
@@ -45,6 +46,33 @@ export const createBooking = mutation({
     });
     const doc = await ctx.db.get(id);
     if (!doc) return null;
+
+    // Prepare service name
+    let serviceName = args.service.title || args.service.type;
+    if (args.service.origin && args.service.destination) {
+      serviceName = `${args.service.origin} to ${args.service.destination}`;
+    }
+
+    // Format the telegram message
+    const message = `
+<b>🔔 New Booking Alert!</b>
+
+<b>👤 Customer:</b> ${args.contact.name}
+<b>📞 Phone:</b> ${args.contact.phone}
+<b>✉️ Email:</b> ${args.contact.email || "N/A"}
+<b>📍 Pickup:</b> ${args.contact.pickupLocation}
+
+<b>🏷️ Service:</b> ${serviceName}
+<b>📅 Start Date:</b> ${args.booking.startDate ? new Date(args.booking.startDate).toLocaleDateString() : "N/A"}
+<b>🕒 Time Slot:</b> ${args.booking.timeSlot || "N/A"}
+<b>👥 Guests:</b> ${args.booking.guests}
+${args.booking.stopNames && args.booking.stopNames.length > 0 ? `<b>🛑 Stops:</b> ${args.booking.stopNames.join(", ")}\n` : ""}
+<b>💰 Total Price:</b> ₹${args.pricing.total}
+`;
+
+    // Schedule sending message (fire and forget to not block the booking creation)
+    await ctx.scheduler.runAfter(0, internal.telegram.sendMessage, { text: message });
+
     return toClientDoc(doc);
   },
 });

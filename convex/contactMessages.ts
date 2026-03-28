@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { internal } from "./_generated/api";
 
 function toClientDoc(doc: any) {
   const { _id, _creationTime, ...rest } = doc;
@@ -24,6 +25,22 @@ export const createContactMessage = mutation({
     });
     const doc = await ctx.db.get(id);
     if (!doc) return null;
+
+    // Format the telegram message
+    const telegramMessage = `
+<b>📝 New Contact Message!</b>
+
+<b>👤 Name:</b> ${args.name}
+<b>📞 Phone:</b> ${args.phone}
+<b>✉️ Email:</b> ${args.email}
+
+<b>💬 Message:</b>
+${args.message}
+`;
+
+    // Schedule sending message (fire and forget)
+    await ctx.scheduler.runAfter(0, internal.telegram.sendMessage, { text: telegramMessage });
+
     return toClientDoc(doc);
   },
 });
