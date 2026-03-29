@@ -63,7 +63,7 @@ const PopularRoutes = () => {
           {routes.map((route) => (
             <div 
               key={route.id} 
-              onClick={() => navigate(`/route/${route.id}`)}
+              onClick={() => openCarPicker(route)}
               className="flex-shrink-0 w-80 md:w-96 bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all cursor-pointer snap-center group"
             >
               {/* Image Area */}

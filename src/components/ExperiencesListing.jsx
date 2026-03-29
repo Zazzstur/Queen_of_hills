@@ -246,7 +246,7 @@ const TicketCard = ({ item, category, onNavigate }) => {
   return (
     <>
       <div 
-        onClick={() => handleViewDetails()}
+        onClick={() => handleBookNow()}
         className="group bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all cursor-pointer flex flex-col h-full"
       >
         {/* Visual Area */}
