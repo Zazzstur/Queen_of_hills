@@ -5,6 +5,8 @@ import { useBooking } from '../context/BookingContext';
 import { ArrowLeft, MapPin, Clock, Info, Check, ChevronDown } from 'lucide-react';
 import StopDisplayCard from './StopDisplayCard';
 import CarTypeModal from './CarTypeModal';
+import { generateRouteUrl, matchRouteBySlug, parseCapacitySlug } from '../utils/urlHelpers';
+import { Helmet } from 'react-helmet-async';
 
 const CAR_OPTIONS = [
   { label: '4 Seater', value: '4 Seater' },
@@ -13,7 +15,7 @@ const CAR_OPTIONS = [
 ];
 
 const RouteDetails = () => {
-  const { id } = useParams();
+  const { slugOrId, capacitySlug } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const { initializeBooking } = useBooking();
@@ -61,22 +63,39 @@ const RouteDetails = () => {
 
   useEffect(() => {
     const fromQuery = new URLSearchParams(location.search).get('capacity');
-    const normalized = normalizeCapacity(fromQuery);
+    const fromSlug = parseCapacitySlug(capacitySlug);
+    const normalized = normalizeCapacity(fromSlug || fromQuery);
     if (normalized) setSelectedCapacity(normalized);
-  }, [location.search]);
+  }, [location.search, capacitySlug]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log('Fetching route details for ID:', id);
+        console.log('Fetching route details for slugOrId:', slugOrId);
         
         // Fetch Route Details
         const { data: routes } = await routeService.getRoutes();
-        // Loose comparison for ID to handle string/number mismatch
-        const foundRoute = routes?.find(r => String(r.id) === String(id));
+        
+        // Try to find by ID first (old format)
+        let foundRoute = routes?.find(r => String(r.id) === String(slugOrId));
+        let isOldFormat = !!foundRoute;
+
+        // If not found by ID, try matching by slug
+        if (!foundRoute) {
+          foundRoute = matchRouteBySlug(routes, slugOrId);
+        }
+
         console.log('Found Route:', foundRoute);
 
         if (foundRoute) {
+            // Redirect to new URL format if accessed via ID
+            if (isOldFormat) {
+              const currentCapacity = new URLSearchParams(location.search).get('capacity') || foundRoute.capacity;
+              const newUrl = generateRouteUrl(foundRoute, currentCapacity);
+              navigate(newUrl, { replace: true });
+              return; // Stop execution here, the new route will re-trigger the effect
+            }
+
             setRoute(foundRoute);
             // Fetch Stops
             const { data: stopsData } = await routeService.getStopsByRouteId(foundRoute.id); // Use the found ID
@@ -99,10 +118,10 @@ const RouteDetails = () => {
         setLoading(false);
       }
     };
-    if (id) {
+    if (slugOrId) {
         fetchData();
     }
-  }, [id]);
+  }, [slugOrId, navigate, location.search]);
 
   const handleAddStop = (stop) => {
       if (selectedStops.some(s => s.id === stop.id)) {
@@ -143,7 +162,7 @@ const RouteDetails = () => {
     setSelectedCapacity(capacity);
     setShowDropdown(false);
     if (route) {
-      navigate(`/route/${route.id}?capacity=${encodeURIComponent(capacity)}`, { replace: true });
+      navigate(generateRouteUrl(route, capacity), { replace: true });
     }
   };
 
@@ -155,8 +174,30 @@ const RouteDetails = () => {
       return <div className="min-h-screen flex items-center justify-center">Route not found</div>;
   }
 
+  // Generate structured data
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": `${route.origin} to ${route.destination} ${route.type === 'direct' ? 'Cab Service' : 'Sightseeing Tour'}`,
+    "description": route.description || `Book a comfortable cab from ${route.origin} to ${route.destination} with Toils Darjeeling.`,
+    "offers": {
+      "@type": "AggregateOffer",
+      "priceCurrency": "INR",
+      "lowPrice": getPriceSet(route).p4,
+      "highPrice": getPriceSet(route).p610,
+      "offerCount": 3
+    }
+  };
+
   return (
     <div className="min-h-screen bg-snow pt-24 pb-20">
+      <Helmet>
+        <title>{route.origin} to {route.destination} Cabs & Taxis | Toils Darjeeling</title>
+        <meta name="description" content={`Book a ${selectedCapacity || route.capacity} cab from ${route.origin} to ${route.destination}. Enjoy a safe and comfortable journey with Toils Darjeeling.`} />
+        <script type="application/ld+json">
+          {JSON.stringify(structuredData)}
+        </script>
+      </Helmet>
       {/* Header / Breadcrumb */}
       <div className="container mx-auto px-4 mb-8">
         <button 

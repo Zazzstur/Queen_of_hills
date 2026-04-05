@@ -3,6 +3,7 @@ import { routeService } from '../services/routeService';
 import { ArrowRight, Users, Route } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import CarTypeModal from './CarTypeModal';
+import { generateRouteUrl } from '../utils/urlHelpers';
 
 const PopularRoutes = () => {
   const [routes, setRoutes] = useState([]);
@@ -48,7 +49,7 @@ const PopularRoutes = () => {
 
   const handleSelectCar = (capacity) => {
     if (!activeRoute) return;
-    const url = `/route/${activeRoute.id}?capacity=${encodeURIComponent(capacity)}`;
+    const url = generateRouteUrl(activeRoute, capacity);
     closeCarPicker();
     navigate(url);
   };

@@ -2,8 +2,10 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { routeService } from '../services/routeService';
 import CarTypeModal from './CarTypeModal';
+import { generateRouteUrl } from '../utils/urlHelpers';
 import { Filter, Star, ArrowRight, ChevronDown, Route, Car } from 'lucide-react';
 import clsx from 'clsx';
+import { Helmet } from 'react-helmet-async';
 
 // --- Components ---
 
@@ -222,7 +224,7 @@ const TicketCard = ({ item, category, onNavigate }) => {
 
   const handleViewDetails = () => {
       if (category === 'routes' || category === 'direct') {
-          onNavigate('route-details', item.id);
+          onNavigate('route-details', item);
       } else {
           // Fallback or generic navigation for other categories
           console.log('Navigate to details for', category, item.id);
@@ -240,7 +242,7 @@ const TicketCard = ({ item, category, onNavigate }) => {
   const handleSelectCar = (capacity) => {
     setSelectedCapacity(capacity);
     setCarModalOpen(false);
-    navigate(`/route/${item.id}?capacity=${encodeURIComponent(capacity)}`);
+    navigate(generateRouteUrl({ type: item.originalType, origin: item.origin, destination: item.destination }, capacity));
   };
 
   return (
@@ -377,6 +379,7 @@ const ExperiencesListing = ({ initialCategory = 'routes', onNavigate }) => {
                 price6SeaterLuxurySuv: route.price6SeaterLuxurySuv,
                 price6to10SeaterSuv: route.price6to10SeaterSuv,
                 bookingCount: route.bookingCount ?? 0,
+                originalType: route.type || 'sightseeing',
                 // Add other fields required by TicketCard if any
             }));
     } else if (activeCategory === 'direct') {
@@ -399,6 +402,7 @@ const ExperiencesListing = ({ initialCategory = 'routes', onNavigate }) => {
                 price6SeaterLuxurySuv: route.price6SeaterLuxurySuv,
                 price6to10SeaterSuv: route.price6to10SeaterSuv,
                 bookingCount: route.bookingCount ?? 0,
+                originalType: route.type || 'direct',
             }));
     } else {
         data = [];
@@ -434,6 +438,19 @@ const ExperiencesListing = ({ initialCategory = 'routes', onNavigate }) => {
 
   return (
     <div className="min-h-screen bg-snow pb-20">
+      <Helmet>
+        <title>
+          {activeCategory === 'routes' 
+            ? 'Darjeeling Sightseeing Packages & Tours | Toils Darjeeling' 
+            : 'Direct Travel & Cab Booking in Darjeeling | Toils Darjeeling'}
+        </title>
+        <meta 
+          name="description" 
+          content={activeCategory === 'routes'
+            ? "Explore the best sightseeing packages in Darjeeling, Gangtok, and Kalimpong. Book custom tours with experienced drivers."
+            : "Book direct cabs for NJP, Bagdogra, Darjeeling, and Gangtok. Affordable and reliable point-to-point taxi services."} 
+        />
+      </Helmet>
       <CompactHero />
       <CategoryNav 
         activeCategory={activeCategory} 
@@ -453,8 +470,8 @@ const ExperiencesListing = ({ initialCategory = 'routes', onNavigate }) => {
                   key={item.id} 
                   item={item} 
                   category={activeCategory} 
-                  onNavigate={(page, id) => {
-                      if (page === 'route-details') navigate(`/route/${id}`);
+                  onNavigate={(page, routeItem) => {
+                      if (page === 'route-details') navigate(generateRouteUrl({ type: routeItem.originalType, origin: routeItem.origin, destination: routeItem.destination }));
                       else if (page === 'experiences') navigate('/sight-seeing'); // Fallback
                   }} 
               />

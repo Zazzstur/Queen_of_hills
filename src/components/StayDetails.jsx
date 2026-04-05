@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { stayService } from '../services/stayService';
 import { useBooking } from '../context/BookingContext';
 import { ArrowLeft, Wifi, Car, Utensils, Bed, Wind, Dumbbell, Thermometer, Mountain, Check } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 
 const AMENITY_ICONS = {
   'Wifi': Wifi,
@@ -76,8 +77,47 @@ const StayDetails = () => {
     navigate('/book');
   };
 
+  // Generate structured data
+  const minPrice = rooms.length > 0 ? Math.min(...rooms.map(r => r.price)) : 0;
+  const maxPrice = rooms.length > 0 ? Math.max(...rooms.map(r => r.price)) : 0;
+  
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Accommodation",
+    "name": stay.title || stay.name,
+    "description": stay.description,
+    "image": stay.thumbnail_url || stay.image,
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": stay.location,
+      "addressRegion": "West Bengal",
+      "addressCountry": "IN"
+    },
+    ...(rooms.length > 0 && {
+      "offers": {
+        "@type": "AggregateOffer",
+        "priceCurrency": "INR",
+        "lowPrice": minPrice,
+        "highPrice": maxPrice,
+        "offerCount": rooms.length
+      }
+    }),
+    "amenityFeature": (stay.amenities || []).map(amenity => ({
+      "@type": "LocationFeatureSpecification",
+      "name": amenity,
+      "value": true
+    }))
+  };
+
   return (
     <div className="min-h-screen bg-snow pt-24 pb-20">
+      <Helmet>
+        <title>{stay.title || stay.name} - Stay in {stay.location} | Toils Darjeeling</title>
+        <meta name="description" content={stay.description?.substring(0, 160) || `Book your stay at ${stay.title || stay.name} in ${stay.location}. Find the best homestays and hotels with Toils Darjeeling.`} />
+        <script type="application/ld+json">
+          {JSON.stringify(structuredData)}
+        </script>
+      </Helmet>
       {/* Header / Breadcrumb */}
       <div className="container mx-auto px-4 mb-8">
         <button 
