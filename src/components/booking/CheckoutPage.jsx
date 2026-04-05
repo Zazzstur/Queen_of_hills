@@ -41,6 +41,7 @@ const CheckoutPage = () => {
             undefined,
           origin: bookingData.serviceDetails?.origin || undefined,
           destination: bookingData.serviceDetails?.destination || undefined,
+          vehicleType: bookingData.serviceDetails?.capacity || undefined,
         },
         booking: {
           startDate: bookingData.startDate

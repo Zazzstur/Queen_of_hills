@@ -23,10 +23,10 @@ const CompactHero = () => (
     
     <div className="relative z-10 text-center px-4">
       <h1 className="text-3xl md:text-5xl font-serif text-white mb-2 drop-shadow-lg">
-        Curated Experiences
+        Customised Cabs
       </h1>
       <p className="text-white/80 text-sm md:text-base max-w-lg mx-auto font-light">
-        Discover the finest stays, journeys, and stories Darjeeling has to offer.
+        Choose your stops. Pay only for where you want to travel.
       </p>
     </div>
   </section>

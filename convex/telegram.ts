@@ -6,21 +6,30 @@ export const sendMessage = internalAction({
     text: v.string(),
   },
   handler: async (ctx, args) => {
-    // You can set these in your Convex Dashboard Environment Variables
     const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "8624872875:AAG9Uyz7WuflpPVvKrLBz2HZ9ifYbGejtuU";
     const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
     const TELEGRAM_CHAT_ID_2 = process.env.TELEGRAM_CHAT_ID_2;
+    const TELEGRAM_CHAT_IDS = process.env.TELEGRAM_CHAT_IDS;
 
     if (!TELEGRAM_BOT_TOKEN) {
       console.error("Telegram integration: Bot token is missing.");
       return { success: false, error: "Bot token is missing" };
     }
 
-    // Create an array of chat IDs to send to (filtering out empty ones)
-    const chatIds = [TELEGRAM_CHAT_ID, TELEGRAM_CHAT_ID_2].filter(Boolean);
+    const chatIds = [
+      ...(TELEGRAM_CHAT_IDS || "")
+        .split(/[\n,]/)
+        .map((chatId) => chatId.trim())
+        .filter(Boolean),
+      TELEGRAM_CHAT_ID,
+      TELEGRAM_CHAT_ID_2,
+    ].filter(
+      (chatId, index, allChatIds): chatId is string =>
+        Boolean(chatId) && allChatIds.indexOf(chatId) === index,
+    );
 
     if (chatIds.length === 0) {
-      console.error("Telegram integration: No Chat IDs are configured. Please set TELEGRAM_CHAT_ID in environment variables.");
+      console.error("Telegram integration: No Chat IDs are configured. Please set TELEGRAM_CHAT_ID or TELEGRAM_CHAT_IDS in environment variables.");
       return { success: false, error: "Chat IDs are missing" };
     }
 
@@ -61,8 +70,8 @@ export const sendMessage = internalAction({
         return { success: false, results };
       }
 
-      console.log("Telegram messages sent successfully to all configured accounts!");
-      return { success: true };
+      console.log(`Telegram messages sent successfully to ${chatIds.length} recipient(s)!`);
+      return { success: true, recipients: chatIds };
     } catch (error: any) {
       console.error("Error sending Telegram message:", error);
       return { success: false, error: error.message };

@@ -21,6 +21,7 @@ export const createBooking = mutation({
       title: v.optional(v.string()),
       origin: v.optional(v.string()),
       destination: v.optional(v.string()),
+      vehicleType: v.optional(v.string()),
     }),
     booking: v.object({
       startDate: v.optional(v.string()),
@@ -63,6 +64,7 @@ export const createBooking = mutation({
 <b>📍 Pickup:</b> ${args.contact.pickupLocation}
 
 <b>🏷️ Service:</b> ${serviceName}
+${args.service.vehicleType ? `<b>🚘 Vehicle Type:</b> ${args.service.vehicleType}\n` : ""}
 <b>📅 Start Date:</b> ${args.booking.startDate ? new Date(args.booking.startDate).toLocaleDateString() : "N/A"}
 <b>🕒 Time Slot:</b> ${args.booking.timeSlot || "N/A"}
 <b>👥 Guests:</b> ${args.booking.guests}
@@ -109,4 +111,3 @@ export const deleteBooking = mutation({
     return null;
   },
 });
-

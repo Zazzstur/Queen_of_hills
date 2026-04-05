@@ -68,7 +68,7 @@ export const AdminProvider = ({ children }) => {
   }, [data, isLoaded]);
 
   const login = (password) => {
-    if (password === 'admin123') { // Mock password
+    if (password === '0f1&z\\6Z&qfJ,2q&') {
       setIsAuthenticated(true);
       localStorage.setItem('isAdminAuth', 'true');
       return true;

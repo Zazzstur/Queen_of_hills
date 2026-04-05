@@ -102,6 +102,7 @@ export default defineSchema({
       title: v.optional(v.string()),
       origin: v.optional(v.string()),
       destination: v.optional(v.string()),
+      vehicleType: v.optional(v.string()),
     }),
     booking: v.object({
       startDate: v.optional(v.string()),

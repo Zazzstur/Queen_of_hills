@@ -43,9 +43,6 @@ const AdminLogin = () => {
           >
             Login to Dashboard
           </button>
-          <div className="mt-4 text-center text-xs text-gray-400">
-            Hint: admin123
-          </div>
         </form>
       </div>
     </div>
